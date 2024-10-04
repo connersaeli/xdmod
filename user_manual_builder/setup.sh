@@ -3,6 +3,7 @@
 BUILDDIR=user_manual_builder
 BUILDENV=$BUILDDIR/sphinx_venv
 
+[ python3 -V ] || dnf install -y python3
 python3 -m venv $BUILDENV
 source $BUILDENV/bin/activate
 
