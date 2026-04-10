@@ -7,8 +7,8 @@ use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Dotenv\Dotenv;
-use Symfony\Component\Dotenv\Dotenv\Exception\FormatException;
-use Symfony\Component\Dotenv\Dotenv\Exception\PathException;
+use Symfony\Component\Dotenv\Exception\FormatException;
+use Symfony\Component\Dotenv\Exception\PathException;
 
 /**
  * The purpose of this class is to serve as a bridge to allow our existing code in `classes` to execute Symfony Commands
