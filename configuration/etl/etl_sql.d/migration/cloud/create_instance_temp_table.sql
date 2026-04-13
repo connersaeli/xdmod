@@ -1,11 +1,11 @@
-create table if not exists modw_cloud.deleted_instance_types as select
+CREATE TABLE IF NOT EXISTS modw_cloud.deleted_instance_types AS SELECT
 	it.instance_type_id,
 	it.instance_type
-from
-	modw_cloud.instance_type as it
-left join
-	modw_cloud.instance_type_staging as its on it.instance_type_id = its.instance_type_id
-where
-	its.instance_type is null
-and
+FROM
+	modw_cloud.instance_type AS it
+LEFT JOIN
+	modw_cloud.instance_type_staging AS its ON it.instance_type_id = its.instance_type_id
+WHERE
+	its.instance_type IS NULL
+AND
 	it.instance_type != 'Unknown';
