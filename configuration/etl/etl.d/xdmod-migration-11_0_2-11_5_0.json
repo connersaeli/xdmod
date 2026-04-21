@@ -430,5 +430,73 @@
                 "migration/update_storage_resource_organization.sql"
             ]
         }
+    ],
+    "cloud-migration_11-0-2_11-5-0": [
+        {
+            "name": "cloud-add-disk-gb-to-instance-data",
+            "description": "Add disk_gb column to modw_cloud.instance_data",
+            "namespace": "ETL\\Maintenance",
+            "options_class": "MaintenanceOptions",
+            "class": "ManageTables",
+            "endpoints": {
+                "destination": {
+                    "type": "mysql",
+                    "name": "Cloud Database",
+                    "config": "database",
+                    "schema": "modw_cloud"
+                }
+            },
+            "definition_file_list": [
+                "cloud_common/instance_data.json"
+            ]
+        },
+        {
+            "name": "cloud-move-disk-gb-to-instance-data",
+            "description": "Copy disk_gb values from instance_type to instance_data",
+            "namespace": "ETL\\Maintenance",
+            "options_class": "MaintenanceOptions",
+            "class": "ExecuteSql",
+            "endpoints": {
+                "source": {
+                    "type": "mysql",
+                    "name": "Cloud Database",
+                    "config": "database",
+                    "schema": "modw_cloud"
+                },
+                "destination": {
+                    "type": "mysql",
+                    "name": "Cloud Database",
+                    "config": "database",
+                    "schema": "modw_cloud"
+                }
+            },
+            "sql_file_list": [
+                "migrations/11.0.0-11.5.0/modw_cloud/move_disk_gb_to_instance_data.sql"
+            ]
+        },
+        {
+            "name": "cloud-remove-disk-gb-from-instance-type",
+            "description": "Drop disk_gb column from modw_cloud.instance_type and update primary key",
+            "namespace": "ETL\\Maintenance",
+            "options_class": "MaintenanceOptions",
+            "class": "ExecuteSql",
+            "endpoints": {
+                "source": {
+                    "type": "mysql",
+                    "name": "Cloud Database",
+                    "config": "database",
+                    "schema": "modw_cloud"
+                },
+                "destination": {
+                    "type": "mysql",
+                    "name": "Cloud Database",
+                    "config": "database",
+                    "schema": "modw_cloud"
+                }
+            },
+            "sql_file_list": [
+                "migrations/11.0.0-11.5.0/modw_cloud/remove_disk_gb_from_instance_type.sql"
+            ]
+        }
     ]
 }
