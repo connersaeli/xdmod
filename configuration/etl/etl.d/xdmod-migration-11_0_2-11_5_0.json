@@ -462,13 +462,12 @@
             ]
         },
         {
-            "name": "createInstanceDataTempTable",
+            "name": "updateInsetanceData",
             "description": "Create temporary table for instance data",
             "namespace": "ETL\\Maintenance",
             "options_class": "MaintenanceOptions",
             "class": "ExecuteSql",
             "sql_file_list": [
-                "migration/cloud/create_instance_temp_table.sql",
                 "migrations/11.0.0-11.5.0/modw_cloud/move_disk_gb_to_instance_data.sql"
             ]
         },
@@ -505,6 +504,16 @@
             "class": "DatabaseIngestor",
             "truncate_destination": true,
             "definition_file": "cloud_openstack/instance_type_staging.json"
+        },
+        {
+            "name": "createInstanceDataTempTable",
+            "description": "Create temporary table for instance data",
+            "namespace": "ETL\\Maintenance",
+            "options_class": "MaintenanceOptions",
+            "class": "ExecuteSql",
+            "sql_file_list": [
+                "migration/cloud/create_instance_temp_table.sql"
+            ]
         },
         {
             "name": "OpenStackCloudInstanceTypeIngestor",
