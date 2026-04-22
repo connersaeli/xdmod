@@ -8,4 +8,4 @@ LEFT JOIN
 WHERE
 	its.instance_type IS NULL
 AND
-	it.instance_type != 'Unknown';
+	it.instance_type != 'Unknown'//

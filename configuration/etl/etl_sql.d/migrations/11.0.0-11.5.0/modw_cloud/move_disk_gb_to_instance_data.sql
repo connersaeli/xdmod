@@ -3,4 +3,4 @@
 -- added to instance_data and before it is dropped from instance_type.
 UPDATE modw_cloud.instance_data itd
 JOIN modw_cloud.instance_type itt ON itd.instance_type_id = itt.instance_type_id
-SET itd.disk_gb = itt.disk_gb;
+SET itd.disk_gb = itt.disk_gb//
