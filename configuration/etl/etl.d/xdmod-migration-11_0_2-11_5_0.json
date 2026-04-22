@@ -475,6 +475,7 @@
             "name": "migrateOpenStackCloudData",
             "description": "Migrate OpenStack cloud data from staging tables to fact and dimension tables in modw",
             "class": "DatabaseIngestor",
+            "truncate_destination": true,
             "definition_file": "cloud_openstack/staging_existing_instance_type.json"
         },
         {
@@ -512,7 +513,7 @@
             "options_class": "MaintenanceOptions",
             "class": "ExecuteSql",
             "sql_file_list": [
-                "migration/cloud/create_instance_temp_table.sql"
+                "migrations/11.0.0-11.5.0/modw_cloud/create_instance_temp_table.sql"
             ]
         },
         {
@@ -529,7 +530,7 @@
             "options_class": "MaintenanceOptions",
             "class": "ExecuteSql",
             "sql_file_list": [
-                "migration/cloud/update_instance_data.sql"
+                "migrations/11.0.0-11.5.0/modw_cloud/update_instance_data.sql"
             ]
         }
     ]
