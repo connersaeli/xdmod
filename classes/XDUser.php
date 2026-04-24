@@ -625,7 +625,7 @@ SQL;
             $acl = new Acl($item);
             $carry [$acl->getName()] = $acl;
             return $carry;
-        });
+        }, array());
 
         $user->setAcls($acls);
         // END: ACL population
