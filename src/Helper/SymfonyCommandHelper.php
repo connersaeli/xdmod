@@ -20,6 +20,23 @@ use Symfony\Component\Dotenv\Exception\PathException;
 class SymfonyCommandHelper
 {
     /**
+     * Execute the provided Symfony $command.
+     *
+     * @param string $command the Symfony command to run.
+     * @param array $options for the Symfony command.
+     * @throws \LogicException if the command is empty.
+     * @throws \Exception if an error is encountered while running the specified command.
+     * @throws \RuntimeException if a non-zero exit code is returned by the Symfony Command.
+     */
+    public static function executeCommand(string $command, array $options = [], string $env = 'prod', bool $debug = false): void
+    {
+        list($statusCode, $output) = self::doExecuteCommand($command, $env, $debug, $options);
+        if ($statusCode !== 0) {
+            throw new \RuntimeException("Error Running Symfony Command $command\n$output");
+        }
+    }
+
+    /**
      * Execute the provided Symfony console command.
      *
      * @param string $command
@@ -30,7 +47,7 @@ class SymfonyCommandHelper
      * @throws \RuntimeException if the environment file cannot be loaded or
      *  if a non-zero exit code is returned by the Symfony console command
      */
-    private static function executeCommand(string $command, array $options = [], string $env = 'prod', bool $debug = false): void
+    private static function doExecuteCommand(string $command, array $options = [], string $env = 'prod', bool $debug = false): void
     {
         if (empty($command)) {
             throw new \LogicException('Command must not be empty.');
@@ -56,9 +73,11 @@ class SymfonyCommandHelper
         $input = new ArrayInput($options);
         $output = new BufferedOutput();
         $statusCode = $application->run($input, $output);
-
-        if ($statusCode !== 0) {
-            throw new \RuntimeException('Error running ' . $command . '\n' . $output->fetch());
+        try {
+            $statusCode = $application->run($input, $output);
+            return [$statusCode, $output->fetch()];
+        } catch(\Exception $e) {
+            throw new \RuntimeException("Error while running Symfony Command", $e->getCode(), $e);
         }
     }
 
