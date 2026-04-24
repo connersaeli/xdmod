@@ -47,7 +47,7 @@ class SymfonyCommandHelper
      * @throws \RuntimeException if the environment file cannot be loaded or
      *  if a non-zero exit code is returned by the Symfony console command
      */
-    private static function doExecuteCommand(string $command, array $options = [], string $env = 'prod', bool $debug = false): void
+    private static function doExecuteCommand(string $command, array $options = [], string $env = 'prod', bool $debug = false): array
     {
         if (empty($command)) {
             throw new \LogicException('Command must not be empty.');
