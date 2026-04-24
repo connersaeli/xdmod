@@ -43,7 +43,7 @@ class MetricExplorerController extends BaseController
      * @return Response
      * @throws Exception
      */
-    #[Route('{prefix}/metrics/explorer/queries', requirements: ['prefix' => '.*'], methods: ['GET'])]
+    #[Route('{prefix}metrics/explorer/queries', requirements: ['prefix' => '.*'], methods: ['GET'])]
     public function getQueries(Request $request): Response
     {
         $action = 'getQueries';
@@ -88,7 +88,7 @@ class MetricExplorerController extends BaseController
      * @param string $queryId
      * @return Response
      */
-    #[Route('{prefix}/metrics/explorer/queries/{queryId}', requirements: ["queryId"=>"\w+", 'prefix' => '.*'], methods: ['GET'])]
+    #[Route('{prefix}metrics/explorer/queries/{queryId}', requirements: ["queryId"=>"\w+", 'prefix' => '.*'], methods: ['GET'])]
     public function getQueryByid(Request $request, string $queryId): Response
     {
         $action = 'getQueryById';
@@ -134,7 +134,7 @@ class MetricExplorerController extends BaseController
      * @param Request $request
      * @return Response
      */
-    #[Route('{prefix}/metrics/explorer/queries', requirements: ['prefix' => '.*'], methods: ['POST'])]
+    #[Route('{prefix}metrics/explorer/queries', requirements: ['prefix' => '.*'], methods: ['POST'])]
     public function createQuery(Request $request): Response
     {
         $action = 'creatQuery';
@@ -190,7 +190,7 @@ class MetricExplorerController extends BaseController
      * @param string $queryId
      * @return Response
      */
-    #[Route('{prefix}/metrics/explorer/queries/{queryId}', requirements: ["queryId"=> "\w+", 'prefix' => '.*'], methods: ['PUT', "POST"])]
+    #[Route('{prefix}metrics/explorer/queries/{queryId}', requirements: ["queryId"=> "\w+", 'prefix' => '.*'], methods: ['PUT', "POST"])]
     public function updateQueryById(Request $request, string $queryId): Response
     {
         $action = 'updateQuery';
@@ -267,7 +267,7 @@ class MetricExplorerController extends BaseController
      * @param string $queryId
      * @return Response
      */
-    #[Route('{prefix}/metrics/explorer/queries/{queryId}', requirements: ["queryId"=> "\w+", 'prefix' => '.*'], methods: ['DELETE'])]
+    #[Route('{prefix}metrics/explorer/queries/{queryId}', requirements: ["queryId"=> "\w+", 'prefix' => '.*'], methods: ['DELETE'])]
     public function deleteQueryById(Request $request, string $queryId): Response
     {
         $action = 'deleteQueryById';
@@ -359,9 +359,6 @@ class MetricExplorerController extends BaseController
      *
      * @param Request $request
      * @return Response
-     * @throws AccessDeniedException
-     * @throws SessionExpiredException
-     * @throws UnknownGroupByException
      * @throws Exception
      */
     #[Route('/controllers/metric_explorer.php', methods: ['POST', 'GET'])]
@@ -369,17 +366,21 @@ class MetricExplorerController extends BaseController
     {
         $operation = $this->getStringParam($request, 'operation', true);
 
-        switch ($operation) {
-            case 'get_data':
-                return $this->getData($request);
-            case 'get_dimension':
-                return $this->getDimensionValues($request);
-            case 'get_dw_descripter':
-                return $this->getDwDescriptors($request);
-            case 'get_filters':
-                return $this->getFilters($request);
-            case 'get_rawdata':
-                return $this->getRawData($request);
+        try {
+            switch ($operation) {
+                case 'get_data':
+                    return $this->getData($request);
+                case 'get_dimension':
+                    return $this->getDimensionValues($request);
+                case 'get_dw_descripter':
+                    return $this->getDwDescriptors($request);
+                case 'get_filters':
+                    return $this->getFilters($request);
+                case 'get_rawdata':
+                    return $this->getRawData($request);
+            }
+        } catch (\Exception $e) {
+            return $this->json(buildError($e));
         }
 
         return $this->json([
@@ -395,12 +396,13 @@ class MetricExplorerController extends BaseController
      * @return Response
      * @throws Exception if there is a problem with the processing of the get_data function.
      */
-    #[Route('{prefix}/metrics/explorer/data', requirements: ['prefix' => '.*'], methods: ['POST', 'GET'])]
+    #[Route('{prefix}metrics/explorer/data', requirements: ['prefix' => '.*'], methods: ['POST', 'GET'])]
     public function getData(Request $request): Response
     {
         $user = $this->detectUser($request, [XDUser::INTERNAL_USER, XDUser::PUBLIC_USER]);
 
-        $m = new \DataWarehouse\Access\MetricExplorer($_REQUEST);
+        $params = array_merge($request->query->all(), $request->request->all());
+        $m = new \DataWarehouse\Access\MetricExplorer($params);
         try {
             $result = $m->get_data($user);
             return new Response($result['results'], 200, $result['headers']);
@@ -424,7 +426,7 @@ class MetricExplorerController extends BaseController
      * @throws AccessDeniedException
      * @throws UnknownGroupByException
      */
-    #[Route('{prefix}/metrics/explorer/dimension/values', requirements: ['prefix' => '.*'], methods: ['POST'])]
+    #[Route('{prefix}metrics/explorer/dimension/values', requirements: ['prefix' => '.*'], methods: ['POST'])]
     public function getDimensionValues(Request $request): Response
     {
         try {
@@ -440,7 +442,6 @@ class MetricExplorerController extends BaseController
                 401
             );
         }
-        $this->logger->warning('User retrieved ', [$user->getUserIdentifier()]);
 
         $dimensionId = $this->getStringParam($request, 'dimension_id', true);
         $offset = $this->getStringParam($request ,'start');
@@ -477,7 +478,7 @@ class MetricExplorerController extends BaseController
      * @return Response
      * @throws Exception if unable to get the currently logged in user.
      */
-    #[Route('{prefix}/metrics/explorer/get_dw_descripter',requirements: ['prefix' => '.*'], methods: ['POST'])]
+    #[Route('{prefix}metrics/explorer/get_dw_descripter',requirements: ['prefix' => '.*'], methods: ['POST'])]
     public function getDwDescriptors(Request $request): Response
     {
         try {
@@ -510,7 +511,7 @@ class MetricExplorerController extends BaseController
             }
 
             // If enabled, try to lookup answer in cache first.
-            $cache_enabled = \xd_utilities\getConfiguration('internal', 'dw_desc_cache') === 'on';
+            $cache_enabled = $this->parameters->get('xdmod.portal_settings.internal.dw_desc_cache') === 'on';
             $cache_data_found = false;
             if ($cache_enabled) {
                 $db = \CCR\DB::factory('database');
@@ -525,9 +526,6 @@ class MetricExplorerController extends BaseController
             // If the cache was not used or was not useful, get descriptors from code.
             if (!$cache_data_found) {
                 $realms = [];
-                // NOTE: this variable is never utilized after being updated. can probably be removed.
-                $groupByObjects = [];
-
                 $realmObjects = Realms::getRealmObjectsForUser($user);
                 $query_descriptor_realms = Acls::getQueryDescripters($user);
 
@@ -556,10 +554,6 @@ class MetricExplorerController extends BaseController
                             $group_by_object = $query_descriptor->getGroupByInstance();
                             $permittedStatistics = $group_by_object->getRealm()->getStatisticIds();
 
-                            $groupByObjects[$query_descriptor_realm . '_' . $groupByName] = [
-                                'object' => $group_by_object,
-                                'permittedStats' => $permittedStatistics
-                            ];
                             $realms[$query_descriptor_realm]['dimensions'][$groupByName] = [
                                 'text' => $groupByName == 'none' ? 'None' : $group_by_object->getName(),
                                 'info' => $group_by_object->getHtmlDescription()
@@ -648,12 +642,9 @@ class MetricExplorerController extends BaseController
      * @return Response
      * @throws Exception if unable to retrieve the currently logged in user.
      */
-    #[Route('{prefix}/metrics/explorer/filters', requirements: ['prefix' => '.*'], methods: ['POST'])]
+    #[Route('{prefix}metrics/explorer/filters', requirements: ['prefix' => '.*'], methods: ['POST'])]
     public function getFilters(Request $request): Response
     {
-        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
-        $returnData = [];
-
         try {
             $user = $this->getLoggedInUser($request->getSession());
 
@@ -697,29 +688,16 @@ class MetricExplorerController extends BaseController
      * @return Response
      * @throws Exception if there is a problem retrieving a user for the request.
      */
-    #[Route('{prefix}/metrics/explorer/raw_data', requirements: ['prefix' => '.*'], methods: ['POST'])]
+    #[Route('{prefix}metrics/explorer/raw_data', requirements: ['prefix' => '.*'], methods: ['POST'])]
     public function getRawData(Request $request): Response
     {
         $user = $this->detectUser($request, array(XDUser::INTERNAL_USER, XDUser::PUBLIC_USER));
 
         try {
-            $config = [];
-            foreach ($request->request->all() as $key => $value) {
-                $config[$key] = $value;
-            }
-
-            $configParam = $this->getStringParam($request, 'config');
-            if (!empty($configParam)) {
-                $configJson = json_decode($configParam, true);
-                $config = array_merge($config, $configJson);
-            }
-
             $requestedFormat = $this->getStringParam($request, 'format');
             $format = DataWarehouse\ExportBuilder::validateFormat($requestedFormat, 'jsonstore', ['jsonstore']);
-            $inline = $this->getBooleanParam($request, 'inline', false, true);
             $dataSetId = $this->getStringParam($request, 'datasetId', true);
             $datapoint = $this->getStringParam($request, 'datapoint', true);
-            $showContextMenu = $this->getBooleanParam($request, 'showContextMenu', false, false);
             $requestedStartDate = $this->getDateFromISO8601Param($request, 'start_date', true);
             $requestedStartDateTs = date_timestamp_get($requestedStartDate);
 
@@ -745,16 +723,12 @@ class MetricExplorerController extends BaseController
                 list($startDate, $endDate) = TimeAggregationUnit::getRawTimePeriod($time_point, $time_period);
             }
 
-            $title = $this->getStringParam($request, 'title');
-
             $requestedGlobalFilters = $this->getStringParam($request, 'global_filters');
 
             $globalFilters = (object)['data' => [], 'total' => 0];
             if (!empty($requestedGlobalFilters)) {
                 $globalFiltersDecoded = urldecode($requestedGlobalFilters);
                 $globalFiltersJson = json_decode($globalFiltersDecoded, true);
-                $this->logger->warning('Global Filters Decoded', [var_export($globalFiltersDecoded, true)]);
-                $this->logger->warning('Global FIlters Json', [json_encode($globalFiltersJson)]);
 
                 if (!empty($globalFiltersJson) && isset($globalFiltersJson['data']) && is_array($globalFiltersJson['data'])) {
                     foreach ($globalFiltersJson['data'] as $datum) {
@@ -845,8 +819,6 @@ class MetricExplorerController extends BaseController
 
                 $dataset = new $dataset_classname($query);
 
-                $filterOpts = array('options' => array('default' => null, 'min_range' => 0));
-
                 $limit = null;
                 $limitParam = $this->getStringParam($request, 'limit');
                 if (!empty($limitParam)) {
@@ -887,8 +859,6 @@ class MetricExplorerController extends BaseController
                     );
                     $privquery->setRoleParameters($groupedRoleParameters);
                     $privquery->setFilters($data_description->filters);
-
-                    $query = $privquery->getQueryString();
 
                     $privdataset = new $dataset_classname($privquery);
 

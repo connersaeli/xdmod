@@ -11,6 +11,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Routing\Attribute\Route;
+use function xd_response\buildError;
 
 /**
  *
@@ -28,16 +29,23 @@ class LogController extends BaseController
     public function index(Request $request): Response
     {
         $operation = $request->get('operation');
-        switch ($operation) {
-            case 'get_levels':
-                return $this->getLevels($request);
-            case 'get_summary':
-                return $this->getSummary($request);
-            case 'get_messages':
-                return $this->getMessages($request);
-            default:
-                throw new BadRequestHttpException();
+        if (empty($operation)) {
+            return $this->json(buildError('operation_not_defined'));
         }
+        try {
+            switch ($operation) {
+                case 'get_levels':
+                    return $this->getLevels($request);
+                case 'get_summary':
+                    return $this->getSummary($request);
+                case 'get_messages':
+                    return $this->getMessages($request);
+            }
+        } catch(\Exception $e) {
+            return $this->json(buildError($e));
+        }
+
+        return $this->json(buildError('invalid_operation_specified'));
     }
 
     /**
@@ -45,7 +53,7 @@ class LogController extends BaseController
      * @param Request $request
      * @return Response
      */
-    #[Route('{prefix}/internal_dashboard/logs/levels', requirements: ['prefix' => '.*'], methods: ['POST'])]
+    #[Route('{prefix}internal_dashboard/logs/levels', requirements: ['prefix' => '.*'], methods: ['POST'])]
     public function getLevels(Request $request): Response
     {
         $levels = [
@@ -71,7 +79,7 @@ class LogController extends BaseController
      * @return Response
      * @throws Exception
      */
-    #[Route('{prefix}/internal_dashboard/logs/messages', requirements: ['prefix' => '.*'], methods: ['POST'])]
+    #[Route('{prefix}internal_dashboard/logs/messages', requirements: ['prefix' => '.*'], methods: ['POST'])]
     public function getMessages(Request $request): Response
     {
         $pdo = DB::factory('logger');
@@ -170,7 +178,7 @@ class LogController extends BaseController
      * @return Response
      * @throws Exception
      */
-    #[Route('{prefix}/internal_dashboard/logs/summary', requirements: ['prefix' => '.*'], methods: ['POST'])]
+    #[Route('{prefix}internal_dashboard/logs/summary', requirements: ['prefix' => '.*'], methods: ['POST'])]
     public function getSummary(Request $request): Response
     {
         $ident = $this->getStringParam($request, 'ident', true);
