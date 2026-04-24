@@ -4,6 +4,7 @@ namespace CCR\Security\Authenticators;
 
 use CCR\Entity\User;
 use Authentication\SAML\XDSamlAuthentication;
+use Configuration\Configuration;
 use Models\Services\Organizations;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -12,6 +13,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
+use Symfony\Component\Security\Core\Exception\UserNotFoundException;
 use Symfony\Component\Security\Http\Authenticator\AbstractAuthenticator;
 use Symfony\Component\Security\Http\Authenticator\AuthenticatorInterface;
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\PreAuthenticatedUserBadge;
@@ -69,11 +71,37 @@ class SimpleSamlPhpAuthenticator extends AbstractAuthenticator implements Authen
     }
 
 
+    /**
+     * Determine whether or not this authenticator supports the provided $request.
+     *
+     * @param Request $request
+     * @return bool|null
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     */
     public function supports(Request $request): ?bool
     {
-        $referer = $request->headers->get('referer');
-        $this->logger->info('Checking if Authenticator supports request', [$referer]);
-        return $referer === $this->parameters->get('sso')['login_link'];
+        // We only allow SSO Auth when the request is a GET for the home page.
+        if (!$request->isMethod('GET') ||
+            !$this->httpUtils->checkRequestPath($request, 'xdmod_home')) {
+            return false;
+        }
+
+        $referer = $request->headers->get('Referer');
+        // And if the referer is not empty.
+        if (empty($referer)) {
+            return false;
+        }
+
+        $authReferrer = $this->parameters->get('xdmod.portal_settings.sso.auth_referer');
+        $generalSiteAddress = $this->parameters->get('xdmod.portal_settings.general.site_address');
+        if (empty($authReferrer) && !empty($generalSiteAddress)) {
+            $authReferrer = sprintf(
+                '%s/simplesaml/module.php/authoauth2/linkback.php',
+                $generalSiteAddress
+            );
+        }
+        return str_starts_with($referer, $authReferrer);
     }
 
     public function authenticate(Request $request): Passport
@@ -154,6 +182,7 @@ class SimpleSamlPhpAuthenticator extends AbstractAuthenticator implements Authen
                 )
             );
         }
+        throw new UserNotFoundException();
     }
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
@@ -165,6 +194,7 @@ class SimpleSamlPhpAuthenticator extends AbstractAuthenticator implements Authen
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?Response
     {
         $this->logger->info('SimpleSAMLPHP Authentication Failed!', [$exception]);
+        return null;
     }
 
     public function start(Request $request, ?AuthenticationException $authException = null): Response

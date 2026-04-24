@@ -15,6 +15,7 @@ use Symfony\Component\Routing\Attribute\Route;
 use xd_security\SessionSingleton;
 use XDUser;
 use XDWarehouse;
+use function xd_response\buildError;
 
 /**
  *
@@ -64,7 +65,7 @@ class UserController extends BaseController
      * @return Response
      * @throws \Exception
      */
-    #[Route("{prefix}/users/current", name: "get_current_user", requirements: ['prefix' => '.*'], methods: ["GET"])]
+    #[Route("{prefix}users/current", name: "get_current_user", requirements: ['prefix' => '.*'], methods: ["GET"])]
     public function getCurrentUser(Request $request)
     {
         $this->authorize($request);
@@ -82,7 +83,7 @@ class UserController extends BaseController
      * @return Response
      * @throws \Exception if unable to look up an XDUser by the currently logged in user's id.
      */
-    #[Route("{prefix}/users/current", name: "update_current_user", requirements: ['prefix' => '.*'], methods: ["PATCH"])]
+    #[Route("{prefix}users/current", name: "update_current_user", requirements: ['prefix' => '.*'], methods: ["PATCH"])]
     public function updateCurrentUser(Request $request)
     {
         // Ensure that the user is logged in.
@@ -118,7 +119,7 @@ class UserController extends BaseController
      * @return Response
      * @throws \Exception
      */
-    #[Route('{prefix}/users/current/api/token', requirements: ['prefix' => '.*'], methods: ['GET'])]
+    #[Route('{prefix}users/current/api/token', requirements: ['prefix' => '.*'], methods: ['GET'])]
     public function getCurrentAPIToken(Request $request): Response
     {
         $user = $this->authorize($request);
@@ -145,7 +146,7 @@ class UserController extends BaseController
      * @return Response
      * @throws \Exception if there is a problem retrieving a database connection.
      */
-    #[Route('{prefix}/users/current/api/token', requirements: ['prefix' => '.*'], methods: ['POST'])]
+    #[Route('{prefix}users/current/api/token', requirements: ['prefix' => '.*'], methods: ['POST'])]
     public function createAPIToken(Request $request): Response
     {
         $user = $this->authorize($request);
@@ -172,7 +173,7 @@ class UserController extends BaseController
      * @return Response
      * @throws \Exception
      */
-    #[Route('{prefix}/users/current/api/token', requirements: ['prefix' => '.*'], methods: ['DELETE'])]
+    #[Route('{prefix}users/current/api/token', requirements: ['prefix' => '.*'], methods: ['DELETE'])]
     public function revokeAPIToken(Request $request): Response
     {
         $user = $this->authorize($request);
@@ -230,13 +231,15 @@ class UserController extends BaseController
      */
     private function listUsers(Request $request): Response
     {
+        // Users must be authenticated before accessing this endpoint.
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
 
+        // Retrieve / handle the required paramters first
         try {
             $start = $this->getIntParam($request, 'start', true);
             $limit = $this->getIntParam($request, 'limit', true);
-            $searchMode = $this->getStringParam($request, 'search_mode', true);
-            $piOnly = $this->getBooleanParam($request, 'pi_only');
+            $searchMode = $this->getStringParam($request, 'search_mode', true, null, RESTRICTION_SEARCH_MODE);
+            $piOnly = $this->getStringParam($request, 'pi_only', true, null, RESTRICTION_YES_NO);
         } catch (\Exception $e) {
             return $this->json([
                 'success' => false,
@@ -246,15 +249,15 @@ class UserController extends BaseController
             ]);
         }
 
-        $dataWarehouse = new XDWarehouse();
-
+        // Retrieve the optional parameters
         $nameFilter = $this->getStringParam($request, 'query');
-
-        $universityId = null;
         $userManagement = $this->getBooleanParam($request, 'userManagement');
 
+        // Retrieve an XDUser for the currently authenticated user.
         $user = XDUser::getUserByUserName($this->getUser()->getUserIdentifier());
 
+        // Potentially retrieve this users associated provider if the user is a Campus Champion
+        $universityId = null;
         if ($user->hasAcl(ROLE_ID_CAMPUS_CHAMPION) && !isset($userManagement)) {
             $universityId = Acls::getDescriptorParamValue($user, ROLE_ID_CAMPUS_CHAMPION, 'provider');
         }
@@ -266,8 +269,12 @@ class UserController extends BaseController
                 break;
             case 'username':
                 $searchMethod = USERNAME_SEARCH;
+                break;
+            default:
+                return $this->json(buildError('Unknown search method'));
         }
 
+        $dataWarehouse = new XDWarehouse();
         list($userCount, $users) = $dataWarehouse->enumerateGridUsers(
             $searchMethod,
             $start,
@@ -282,23 +289,20 @@ class UserController extends BaseController
         foreach ($users as $currentUser) {
             $entryId++;
 
-            switch ($searchMode) {
-                case 'formal_name':
-                    $personName = $currentUser['long_name'];
-                    $personId = $currentUser['id'];
-                    break;
-                case 'username':
-                    $personName = $currentUser['abusername'];
-                    $personId = $currentUser['id'] . ';' . $currentUser['absusername'];
-                    break;
-                default:
-                    $personName = 'Invalid';
-                    $personId = -666;
-                    break;
+            if ($searchMethod === FORMAL_NAME_SEARCH) {
+                $personName = $currentUser['long_name'];
+                $personID = $currentUser['id'];
+            } elseif ($searchMethod === USERNAME_SEARCH) {
+                $personName = $currentUser['absusername'];
+
+                // Append the absusername to the id so that each entry is guaranteed
+                // to have a unique identifier (needed for dependent ExtJS combobox
+                // (TGUserDropDown.js) to work properly regarding selections).
+                $personID = $currentUser['id'] . ';' . $currentUser['absusername'];
             }
             $userEntries[] = [
                 'id' => $entryId,
-                'person_id' => $personId,
+                'person_id' => $personID,
                 'person_name' => $personName
             ];
         }
@@ -501,7 +505,7 @@ SQL;
         $hash = password_hash($password, PASSWORD_DEFAULT, array('cost' => 12));
 
         $createdOn = date_create()->format('Y-m-d H:m:s');
-        $expirationInterval = \xd_utilities\getConfiguration('api_token', 'expiration_interval');
+        $expirationInterval =  $this->parameters->get('xdmod.portal_settings.api_token.expiration_interval');
         if (empty($expirationInterval)) {
             throw new \Exception('Expiration Interval not provided.');
         }

@@ -33,8 +33,35 @@ color () {
 log () {
     header=$1
     message=$2
+
+    # echo out the log entry to saml_setup.log so we have a "durable" place to look for these logs.
+    echo "[$header] $message" >> /var/log/xdmod/saml_setup.log
+
+    # output the pretty colored messages for when we're watching the build / setup process.
     prefix=$(color $header 'green')
     printf "[$prefix] $message\n"
+}
+
+function configurePortalSettings()
+{
+    host=$1;
+    log "xdmod" "Configuring /etc/xdmod/portal_settings.ini"
+
+    grep -ie "auth_referer=https://xdmod:7000" /etc/xdmod/portal_settings.ini
+    exit_code=$?
+    if [[ $exit_code -eq 1 ]]; then
+        log "xdmod" "Updating auth_referer in portal_settings.ini"
+        # Add the auth_referer property to portal_settings.ini
+        sed -i "s|auth_referer=|auth_referer=$host|g" /etc/xdmod/portal_settings.ini
+
+        # Make sure that the cache is reset so that `auth_referer` shows up in Symfony at runtime.
+        log "xdmod" "Clearing Symfony cache"
+        console cache:clear
+    else
+        log "xdmod" "portal_settings already has an auth_referer, skipping"
+    fi
+
+    log "xdmod" "portal_settings.ini configured!"
 }
 
 function configureSimplesamlPHP()
@@ -170,7 +197,7 @@ localSSO() {
     cd /tmp || exit
 
     log "setup" "installing saml idp server"
-    if [ -f $CACHE_FILE ];
+    if [[ -f $CACHE_FILE ]];
     then
         log "setup" "using cached copy"
         tar -zxf $CACHE_FILE
@@ -287,10 +314,13 @@ EOF
     # Configure SimplesamlPHP, stops / starts httpd as appropriate
     configureSimplesamlPHP;
 
+    log "xdmod" "Configuring XDMoD"
+    configurePortalSettings "https://xdmod:7000"
+
     AUD_URL=https://$HOSTNAME/xdmod-sp
 
     # The ACS url is the only one that needs the port specified.
-    if [ -n "$PORT" ]; then
+    if [[ -n "$PORT" ]]; then
             HOSTNAME="${HOSTNAME}:${PORT}"
     fi
 
@@ -314,7 +344,7 @@ if [[ "$TYPE" == 'local'  ]]; then
     log "settings" "Host: $HOSTNAME"
     log "settings" "Port: $PORT"
     localSSO
-elif [ "$TYPE" == "keycloak" ]; then
+elif [[ "$TYPE" == "keycloak" ]]; then
     keycloakSSO
 else
     echo "You must provide a type of setup ( -t ) to continue ";

@@ -50,8 +50,8 @@ class SymfonyCommandHelper
         // we set this so that it doesn't `exit` whatever php script is calling this function.
         $application->setAutoExit(false);
 
-        // Set the Symfony command to execute
-        $options['command'] = $command;
+        // Set the Symfony command to execute.
+        array_unshift($options, $command);
 
         $input = new ArrayInput($options);
         $output = new BufferedOutput();

@@ -10,6 +10,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Routing\Attribute\Route;
 use XDUser;
+use function xd_response\buildError;
 
 /**
  */
@@ -24,7 +25,11 @@ class MailController extends BaseController
     public function index(Request $request): Response
     {
         $user = $this->getUserFromRequest($request);
-        $operation = $this->getStringParam($request, 'operation', true);
+        $operation = $this->getStringParam($request, 'operation');
+
+        if (empty($operation)) {
+            return $this->json(buildError('operation_not_specified'));
+        }
 
         switch ($operation) {
             case 'contact':
@@ -32,7 +37,7 @@ class MailController extends BaseController
             case 'sign_up':
                 return $this->signUp($request);
             default:
-                throw new BadRequestHttpException('invalid operation specified');
+                return $this->json(buildError('invalid_operation_specified'));
         }
     }
 
@@ -85,7 +90,7 @@ class MailController extends BaseController
             MailWrapper::sendMail(array(
                     'body' => $message,
                     'subject' => $subject,
-                    'toAddress' => \xd_utilities\getConfiguration('general', 'contact_page_recipient'),
+                    'toAddress' => $this->parameters->get('xdmod.portal_settings.general.contact_page_recipient'),
                     'fromAddress' => $_POST['email'],
                     'fromName' => $_POST['name']
                 )
@@ -206,13 +211,25 @@ MSG;
         $response = [];
 
         // Original sender's e-mail must be in the "fromAddress" field for the XDMoD Request Tracker to function
+        $subject = sprintf(
+            '[%s] A visitor has signed up',
+            $this->parameters->get('xdmod.portal_settings.general.title')
+        );
+        $toAddress = $this->parameters->get('xdmod.portal_settings.general.contact_page_recipient');
+        $fromAddress = $this->getEmailParam($request, 'email');
+        $fromName = sprintf(
+            '$%s, %s',
+            $this->getStringParam($request, 'last_name'),
+            $this->getStringParam($request, 'first_name')
+        );
+
         try {
             MailWrapper::sendMail([
                 'body' => $message,
-                'subject' => '[' . \xd_utilities\getConfiguration('general', 'title') . '] A visitor has signed up',
-                'toAddress' => \xd_utilities\getConfiguration('general', 'contact_page_recipient'),
-                'fromAddress' => $_POST['email'],
-                'fromName' => $_POST['last_name'] . ', ' . $_POST['first_name']
+                'subject' => $subject,
+                'toAddress' => $toAddress,
+                'fromAddress' => $fromAddress,
+                'fromName' => $fromName
             ]);
             $response['success'] = true;
         } catch (Exception $e) {

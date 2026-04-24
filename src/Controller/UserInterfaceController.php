@@ -10,10 +10,8 @@ use Exception;
 use Models\Services\Acls;
 use Models\Services\Realms;
 use Models\Services\Tabs;
-use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Attribute\Route;
 use function xd_response\buildError;
@@ -33,21 +31,28 @@ class UserInterfaceController extends BaseController
     #[Route("/controllers/user_interface.php", name: "legacy_user_interface")]
     public function index(Request $request): Response
     {
-        $operation = $this->getStringParam($request, 'operation', true);
-        switch ($operation) {
-            case 'get_charts':
-                return $this->getCharts($request);
-            case 'get_data':
-                return $this->getData($request);
-            case 'get_menus':
-                return $this->getMenus($request);
-            case 'get_param_descriptions':
-                return $this->getParamDescriptions($request);
-            case 'get_tabs':
-                return $this->getTabs($request);
+        $operation = $this->getStringParam($request, 'operation');
+        if (empty($operation)) {
+            return $this->json(buildError('operation_not_defined'));
         }
 
-        throw new NotFoundHttpException();
+        try {
+            switch ($operation) {
+                case 'get_charts':
+                    return $this->getCharts($request);
+                case 'get_data':
+                    return $this->getData($request);
+                case 'get_menus':
+                    return $this->getMenus($request);
+                case 'get_param_descriptions':
+                    return $this->getParamDescriptions($request);
+                case 'get_tabs':
+                    return $this->getTabs($request);
+            }
+        } catch (\Exception $e) {
+            return $this->json(buildError($e));
+        }
+        return $this->json(buildError('invalid_operation_specified'));
     }
 
     /**
@@ -56,7 +61,7 @@ class UserInterfaceController extends BaseController
      * @return Response
      * @throws Exception
      */
-    #[Route('{prefix}/interfaces/user/tabs', requirements: ['prefix' => '.*'], methods: ['POST'])]
+    #[Route('{prefix}interfaces/user/tabs', requirements: ['prefix' => '.*'], methods: ['POST'])]
     public function getTabs(Request $request): Response
     {
         $user = $this->getXDUser($request->getSession());
@@ -101,7 +106,7 @@ class UserInterfaceController extends BaseController
      * @return Response
      * @throws Exception
      */
-    #[Route('{prefix}/interfaces/user/charts', requirements: ['prefix' => '.*'],  methods: ['POST'])]
+    #[Route('{prefix}interfaces/user/charts', requirements: ['prefix' => '.*'],  methods: ['POST'])]
     public function getCharts(Request $request): Response
     {
         $this->logger->debug('Calling Get Charts');
@@ -180,7 +185,7 @@ class UserInterfaceController extends BaseController
      * @return Response
      * @throws Exception
      */
-    #[Route('{prefix}/interfaces/user/data', requirements: ['prefix' => '.*'], methods: ['POST'])]
+    #[Route('{prefix}interfaces/user/data', requirements: ['prefix' => '.*'], methods: ['POST'])]
     public function getData(Request $request): Response
     {
         $this->logger->debug('GetData Called');
@@ -193,7 +198,7 @@ class UserInterfaceController extends BaseController
      * @return Response
      * @throws Exception
      */
-    #[Route('{prefix}/interfaces/user/menus', requirements: ['prefix' => '.*'], methods: ['POST'])]
+    #[Route('{prefix}interfaces/user/menus', requirements: ['prefix' => '.*'], methods: ['POST'])]
     public function getMenus(Request $request): Response
     {
         $returnData = [];
@@ -343,8 +348,8 @@ class UserInterfaceController extends BaseController
                 }
             }
         } elseif (
-            isset($_REQUEST['node'])
-            && substr($_REQUEST['node'], 0, 13) == 'node=group_by'
+            isset($node)
+            && substr($node, 0, 13) == 'node=group_by'
         ) {
             $this->logger->debug('Getting Menus for group_by');
             $category = $this->getStringParam($request, 'category');
@@ -432,7 +437,7 @@ class UserInterfaceController extends BaseController
      * @return Response
      * @throws Exception
      */
-    #[Route('{prefix}/interfaces/userparameters/descriptions', requirements: ['prefix' => '.*'],  methods: ['POST'])]
+    #[Route('{prefix}interfaces/userparameters/descriptions', requirements: ['prefix' => '.*'],  methods: ['POST'])]
     public function getParamDescriptions(Request $request): Response
     {
         $user = $this->getXDUser($request->getSession());

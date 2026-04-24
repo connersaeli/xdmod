@@ -20,6 +20,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 use Symfony\Component\Routing\Attribute\Route;
 use Twig\Environment;
+use function xd_response\buildError;
 
 
 /**
@@ -32,25 +33,6 @@ use Twig\Environment;
  */
 class AuthenticationController extends BaseController
 {
-
-    /**
-     * If SSO is setup, this is the url that will be used to log into the configured Identity Provider.
-     */
-    private string $ssoUrl;
-
-    /**
-     * @param LoggerInterface $logger
-     * @param ContainerBagInterface $parameters
-     * @param Environment $twig
-     * @param Tokens $tokenHelper
-     * @throws NotFoundExceptionInterface|ContainerExceptionInterface this is thrown if the `sso` section of `services.yaml` is not present.
-     */
-    public function __construct(LoggerInterface $logger, ContainerBagInterface $parameters, Environment $twig, Tokens $tokenHelper)
-    {
-        $this->logger = $logger;
-        $this->ssoUrl = $parameters->get('sso')['login_link'];
-        parent::__construct($logger, $twig, $tokenHelper);
-    }
 
     /**
      * This route is here just to provide a route, no actual logging in is done here as evidenced by the only code
@@ -69,7 +51,7 @@ class AuthenticationController extends BaseController
      *
      * @return NotFoundHttpException
      */
-    #[Route('{prefix}/login', name: 'xdmod_login', requirements: ['prefix' => '.*'], methods: ['POST'])]
+    #[Route('{prefix}login', name: 'xdmod_login', requirements: ['prefix' => '.*'], methods: ['POST'])]
     #[Route('/login', name: 'xdmod_new_login', methods: ['POST'])]
     public function login(): NotFoundHttpException
     {
@@ -105,18 +87,20 @@ class AuthenticationController extends BaseController
      *
      * @return Response
      */
-    #[Route('{prefix}/auth/idpredirect', name: 'idp_redirect', requirements: ['prefix' => '.*'], methods: ['GET'])]
+    #[Route('{prefix}auth/idpredirect', name: 'idp_redirect', requirements: ['prefix' => '.*'], methods: ['GET'])]
     public function idpRedirect(Request $request): Response
     {
-        $returnTo = $this->getStringParam($request, 'returnTo');
-        $value = $this->ssoUrl;
-        if (!empty($returnTo)) {
-            $ssoUrl = $this->ssoUrl;
-            $returnTo = urlencode($returnTo);
-            $value = "{$ssoUrl}?ReturnTo=$returnTo";
-            $request->getSession()->set('_security.main.target_path', $returnTo);
+        $returnTo = $this->getStringParam($request, 'returnTo', true);
+
+        $request->getSession()->set('_security.main.target_path', $returnTo);
+
+        $auth = new \Authentication\SAML\XDSamlAuthentication();
+        $redirectUrl = $auth->getLoginURL($returnTo);
+        if ($redirectUrl === false ) {
+            return $this->json(buildError(new \Exception('SSO not configured.')));
         }
-        return new Response($value, Response::HTTP_OK, ['Content-Type' => 'text/plain']);
+
+        return new Response($redirectUrl, Response::HTTP_OK, ['Content-Type' => 'text/plain']);
     }
 
 
@@ -129,11 +113,11 @@ class AuthenticationController extends BaseController
      *                           screen.
      * @throws Exception if a JupyterHub is not configured.
      */
-    #[Route('/jwt-redirect', methods: ['GET'])]
+    #[Route('{prefix}jwt-redirect', requirements: ['prefix' => '.*'], methods: ['GET'])]
     public function redirectWithJwt(Request $request): Response
     {
         try {
-            $jupyterhub_url = \xd_utilities\getConfiguration('jupyterhub', 'url');
+            $jupyterhub_url = $this->parameters->get('xdmod.portal_settings.jupyterhub.url');
         } catch (Exception $e) {
             throw new HttpException(501, 'JupyterHub not configured.');
         }
