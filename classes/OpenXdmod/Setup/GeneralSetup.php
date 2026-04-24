@@ -128,11 +128,7 @@ EOT
 
         $this->saveIniConfig($settings, 'portal_settings');
 
-        $envTemplate = new Template('env');
-        $envTemplate->apply([
-            'app_secret' => hash('sha512', time())
-        ]);
-        $this->saveTemplate($envTemplate, BASE_DIR . '/.env');
+        file_put_contents(BASE_DIR . '/.env', '');
         SymfonyCommandHelper::dumpDotEnv();
     }
 }
