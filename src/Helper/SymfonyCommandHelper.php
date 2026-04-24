@@ -30,7 +30,7 @@ class SymfonyCommandHelper
      */
     public static function executeCommand(string $command, array $options = [], string $env = 'prod', bool $debug = false): void
     {
-        list($statusCode, $output) = self::doExecuteCommand($command, $env, $debug, $options);
+        list($statusCode, $output) = self::doExecuteCommand($command, $options, $env, $debug);
         if ($statusCode !== 0) {
             throw new \RuntimeException("Error Running Symfony Command $command\n$output");
         }
