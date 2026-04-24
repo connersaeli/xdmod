@@ -9,12 +9,14 @@ use CCR\DB;
 use Exception;
 use Models\Services\Users;
 use OpenXdmod\Assets;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\HeaderUtils;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Routing\Attribute\Route;
+use function xd_response\buildError;
 
 
 /**
@@ -22,6 +24,21 @@ use Symfony\Component\Routing\Attribute\Route;
  */
 class InternalDashboardController extends BaseController
 {
+
+    /**
+     * This route allows us to simulate the same behavior that we had previously in our two-auth system where logging
+     * out of the internal dashboard landed you back at the internal dashboard login page.
+     *
+     * @param Security $security
+     *
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    #[Route('/internal_dashboard/logout', methods: ['GET'])]
+    public function dashboardLogout(Security $security): Response
+    {
+        $security->logout(false);
+        return $this->redirect('/internal_dashboard');
+    }
 
     /**
      *
@@ -84,12 +101,19 @@ class InternalDashboardController extends BaseController
     public function dashboardIndex(Request $request): Response
     {
         $operation = $request->get('operation');
-        switch ($operation) {
-            case 'get_menu':
-                return $this->getMenus($request);
-            default:
-                throw new BadRequestHttpException();
+        if (empty($operation)) {
+            return $this->json(buildError('operation_not_defined'));
         }
+        try {
+            switch ($operation) {
+                case 'get_menu':
+                    return $this->getMenus($request);
+            }
+        } catch (\Exception $e) {
+            return $this->json(buildError($e));
+        }
+
+        return $this->json(buildError('invalid_operation_specified'));
     }
 
     /**
@@ -125,12 +149,19 @@ class InternalDashboardController extends BaseController
     public function userController(Request $request): Response
     {
         $operation = $request->get('operation');
-        switch ($operation) {
-            case 'get_summary':
-                return $this->getUserSummary($request);
-            default:
-                throw new BadRequestHttpException();
+        if (empty($operation)) {
+            return $this->json(buildError('operation_not_defined'));
         }
+        try {
+            switch ($operation) {
+                case 'get_summary':
+                    return $this->getUserSummary($request);
+            }
+        } catch(\Exception $e) {
+            return $this->json(buildError($e));
+        }
+
+        return $this->json(buildError('invalid_operation_specified'));
     }
 
     /**
@@ -187,7 +218,11 @@ class InternalDashboardController extends BaseController
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
         $this->authorize($request, ['mgr']);
 
-        $operation = $this->getStringParam($request, 'operation', true);
+        $operation = $this->getStringParam($request, 'operation');
+        if (empty($operation)) {
+            return $this->json(buildError('operation_not_defined'));
+        }
+
         switch ($operation) {
             case 'enum_account_requests':
                 return $this->enumAccountRequests($request);
@@ -207,11 +242,7 @@ class InternalDashboardController extends BaseController
             case 'logout':
                 return $this->redirectToRoute('xdmod_logout');
         }
-
-        return $this->json([
-            'success' => false,
-            'message' => 'operation not recognized'
-        ]);
+        return $this->json(buildError('invalid_operation_specified'));
     }
 
     /**

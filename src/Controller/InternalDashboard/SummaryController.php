@@ -16,6 +16,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Attribute\Route;
 use XDUser;
+use function xd_response\buildError;
 
 /**
  *
@@ -42,22 +43,27 @@ class SummaryController extends BaseController
     #[Route('/internal_dashboard/controllers/summary.php')]
     public function index(Request $request): Response
     {
-        $operation = $this->getStringParam($request, 'operation', true);
-
-        switch ($operation) {
-            case 'get_config':
-                return $this->getConfig($request);
-            case 'get_portlets':
-                return $this->getPortlets($request);
-            default:
-                throw new NotFoundHttpException('Unknown Operation Provided');
+        $operation = $this->getStringParam($request, 'operation');
+        if (empty($operation)) {
+            return $this->json(buildError('operation_not_defined'));
         }
+        try {
+            switch ($operation) {
+                case 'get_config':
+                    return $this->getConfig($request);
+                case 'get_portlets':
+                    return $this->getPortlets($request);
+            }
+        } catch(\Exception $e) {
+            return $this->json(buildError($e));
+        }
+        return $this->json(buildError('invalid_operation_specified'));
     }
 
     /**
      * @throws Exception
      */
-    #[Route('{prefix}/summary/configs', requirements: ['prefix' => '.*'], methods: ['POST'])]
+    #[Route('{prefix}summary/configs', requirements: ['prefix' => '.*'], methods: ['POST'])]
     public function getConfig(Request $request): Response
     {
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
@@ -111,7 +117,7 @@ class SummaryController extends BaseController
     /**
      * @throws Exception
      */
-    #[Route('{prefix}/summary/portlets', requirements: ['prefix' => '.*'], methods: ['POST'])]
+    #[Route('{prefix}summary/portlets', requirements: ['prefix' => '.*'], methods: ['POST'])]
     public function getPortlets(Request $request): Response
     {
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
@@ -167,7 +173,7 @@ class SummaryController extends BaseController
      * @return Response
      * @throws Exception
      */
-    #[Route('{prefix}/summary/charts', requirements: ['prefix' => '.*'], methods: ['GET'])]
+    #[Route('{prefix}summary/charts', requirements: ['prefix' => '.*'], methods: ['GET'])]
     public function getCharts(Request $request): Response
     {
         $user = $this->getUser();
