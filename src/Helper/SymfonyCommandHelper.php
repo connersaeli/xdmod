@@ -72,7 +72,6 @@ class SymfonyCommandHelper
 
         $input = new ArrayInput($options);
         $output = new BufferedOutput();
-        $statusCode = $application->run($input, $output);
         try {
             $statusCode = $application->run($input, $output);
             return [$statusCode, $output->fetch()];
