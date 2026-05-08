@@ -24,6 +24,16 @@ use DataWarehouse\Data\TimeseriesDataset;
 */
 class TimeseriesChart extends AggregateChart
 {
+    /**
+     * @see AggregateChart
+     */
+    protected $show_filters;
+
+    /**
+     * @see AggregateChart
+     */
+    protected $_hasLegend;
+
     // ---------------------------------------------------------
     // __construct()
     //
@@ -597,7 +607,7 @@ class TimeseriesChart extends AggregateChart
                                 'shape' => ($data_description->display_type == 'spline' || $data_description->display_type == 'areaspline') ? 'spline' : 'linear'
                             ),
                             'mode' => $data_description->display_type == 'scatter' ? 'markers' : 'lines+markers',
-                            'hoveron' => $data_description->display_type == 'area' || $data_description->display_type == 'areaspline' ? 'points+fills' : 'points',
+                            'hoveron' => 'points',
                             'yaxis' => "y{$yIndex}",
                             'showlegend' => $data_description->display_type != 'pie',
                             'hovertext' => $text,

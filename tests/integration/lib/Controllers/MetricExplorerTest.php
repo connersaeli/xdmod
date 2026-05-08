@@ -7,6 +7,13 @@ use IntegrationTests\TestHarness\XdmodTestHelper;
 
 class MetricExplorerTest extends TokenAuthTest
 {
+    /**
+     * A helper class that simplifies interacting with XDMoD's REST interface.
+     *
+     * @var XdmodTestHelper
+     */
+    private $helper;
+
     protected function setup(): void
     {
         $this->helper = new XdmodTestHelper();
@@ -303,8 +310,8 @@ class MetricExplorerTest extends TokenAuthTest
             }
         }
         $expectedCounts = [
-            'cd' => 66,
-            'cs' => 66,
+            'cd' => 67,
+            'cs' => 67,
             'usr' => 1,
             'pi' => 6,
             'mgr' => 0

@@ -99,6 +99,7 @@ EOT
                 'modw_aggregates',
                 'modw_filters',
                 'mod_logger',
+                'modw_etl',
             );
 
             $this->createDatabases(
@@ -150,7 +151,8 @@ EOT
             'staging-bootstrap',
             'hpcdb-bootstrap',
             'acls-xdmod-management',
-            'logger-bootstrap'
+            'logger-bootstrap',
+            'etl-journal-bootstrap'
         ), $logger);
 
 
@@ -168,7 +170,7 @@ EOT
 
         passthru(BIN_DIR . '/acl-config', $aclstatus);
         if ($aclstatus !== 0) {
-            $logger->err('Error while running acl-config');
+            $logger->error('Error while running acl-config');
         }
     }
 }

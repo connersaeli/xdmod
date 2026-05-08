@@ -77,6 +77,24 @@ test.describe('Usage', async () => {
                     await expect(check).toBe(true);
                 }
             });
+            await test.step('Page reload on base chart returns the same chart', async () => {
+                await expect(page.locator(usg.selectors.treeNodeByPath('Jobs Summary', 'Job Size: Min'))).toBeVisible();
+                await page.locator(usg.selectors.treeNodeByPath('Jobs Summary', 'Job Size: Min')).click();
+                await expect(page.locator(usg.selectors.chartByTitle('Job Size: Min (Core Count)', true))).toBeVisible();
+
+                await page.reload();
+
+                await expect(page.locator(usg.selectors.chartByTitle('Job Size: Min (Core Count)', true))).toBeVisible();
+
+            });
+            await test.step('Drilldown on summary chart', async () => {
+                await expect(page.locator(usg.selectors.topTreeNodeByName('Jobs Summary'))).toBeVisible();
+                await page.locator(usg.selectors.topTreeNodeByName('Jobs Summary')).click();
+                await expect(page.locator(usg.selectors.summaryChartLinkByName('CPU Hours: Per Job'))).toBeVisible();
+                await page.locator(usg.selectors.summaryChartLinkByName('CPU Hours: Per Job')).click();
+                await expect(page.locator(usg.selectors.unfoldTreeNodeByName('Jobs Summary', 'CPU Hours: Per Job'))).toBeVisible();
+                await expect(page.locator(usg.selectors.chartByTitle('CPU Hours: Per Job', true))).toBeVisible();
+            });
         });
         test('(Public User)', async ({page}) => {
             await page.goto('/');
@@ -104,13 +122,70 @@ test.describe('Usage', async () => {
                 await expect(page.locator(usg.selectors.chartByTitle('Job Size: Min (Core Count)', true))).toBeVisible();
                 await usg.checkLegendText(expected.centerdirector.legend);
             });
+            await test.step('Page reload on base chart returns the same chart', async () => {
+                await expect(page.locator(usg.selectors.treeNodeByPath('Jobs Summary', 'Job Size: Min'))).toBeVisible();
+                await page.locator(usg.selectors.treeNodeByPath('Jobs Summary', 'Job Size: Min')).click();
+                await expect(page.locator(usg.selectors.chartByTitle('Job Size: Min (Core Count)', true))).toBeVisible();
+
+                await page.reload();
+
+                await expect(page.locator(usg.selectors.chartByTitle('Job Size: Min (Core Count)', true))).toBeVisible();
+            });
+            await test.step('Drilldown on summary chart', async () => {
+                await expect(page.locator(usg.selectors.topTreeNodeByName('Jobs Summary'))).toBeVisible();
+                await page.locator(usg.selectors.topTreeNodeByName('Jobs Summary')).click();
+                await expect(page.locator(usg.selectors.summaryChartLinkByName('CPU Hours: Per Job'))).toBeVisible();
+                await page.locator(usg.selectors.summaryChartLinkByName('CPU Hours: Per Job')).click();
+                await expect(page.locator(usg.selectors.unfoldTreeNodeByName('Jobs Summary', 'CPU Hours: Per Job'))).toBeVisible();
+                await expect(page.locator(usg.selectors.chartByTitle('CPU Hours: Per Job', true))).toBeVisible();
+            });
+
             await test.step('Confirm System Username is not selectable', async () => {
                 await expect(page.locator(usg.selectors.unfoldTreeNodeByName('Jobs Summary'))).toBeVisible();
                 await page.locator(usg.selectors.unfoldTreeNodeByName('Jobs Summary')).click();
                 await expect(page.locator(usg.selectors.topTreeNodeByName('Jobs by System Username'))).toBeVisible();
                 await page.locator(usg.selectors.topTreeNodeByName('Jobs by System Username')).click();
-                await expect(page.locator(usg.selectors.chartByTitle('Job Size: Min (Core Count)', true))).toBeVisible();
+                await expect(page.locator(usg.selectors.chartByTitle('CPU Hours: Per Job', true))).toBeVisible();
             });
+        });
+        test('loads chart with valid start and end date from URL', async ({ page }) => {
+            const baseUrl = globalConfig.use.baseURL;
+            const usg = new Usage(page, baseUrl);
+            const start = '2012-06-01';
+            const end = '2017-06-20';
+            await page.goto(`${baseUrl}/#tg_usage?node=statistic_Jobs_none_total_cpu_hours&start_time=${start}&end_time=${end}`);
+            await page.waitForLoadState('networkidle');
+            await expect(usg.chartLocator).toBeVisible();
+            await expect(usg.maskLocator).toBeHidden();
+            const startValue = await usg.startFieldLocator.inputValue();
+            const endValue = await usg.endFieldLocator.inputValue();
+            expect(startValue).toContain(start);
+            expect(endValue).toContain(end);
+        });
+        test('ignores invalid date values from URL and falls back safely', async ({ page }) => {
+            const baseUrl = globalConfig.use.baseURL;
+            const usg = new Usage(page, baseUrl);
+            const start = 'hi';
+            const end = 'bye';
+            await page.goto(`${baseUrl}/#tg_usage?node=statistic_Jobs_none_total_cpu_hours&start_time=${start}&end_time=${end}`);
+            await page.waitForLoadState('networkidle');
+            await expect(usg.chartLocator).toBeVisible();
+            await expect(usg.maskLocator).toBeHidden();
+            const startValue = await usg.startFieldLocator.inputValue();
+            const endValue = await usg.endFieldLocator.inputValue();
+            expect(startValue).not.toContain(start);
+            expect(endValue).not.toContain(end);
+        });
+        test('applies duration filter from URL correctly', async ({ page }) => {
+            const baseUrl = globalConfig.use.baseURL;
+            const usg = new Usage(page, baseUrl);
+            const duration = 'Yesterday';
+            await page.goto(`${baseUrl}/#tg_usage?node=statistic_Jobs_none_total_cpu_hours&duration=${duration}`);
+            await page.waitForLoadState('networkidle');
+            await expect(usg.chartLocator).toBeVisible();
+            await expect(usg.maskLocator).toBeHidden();
+            const durationValue = await usg.durationButtonLocator.innerText();
+            expect(durationValue).toContain(duration);
         });
     }
 });
