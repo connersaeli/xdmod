@@ -1,4 +1,7 @@
 #!/bin/bash
+
+set -eo pipefail
+
 BASEDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source $BASEDIR/../ci/runtest-include.sh
 echo "Component tests beginning:" `date +"%a %b %d %H:%M:%S.%3N %Y"`
