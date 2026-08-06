@@ -158,8 +158,8 @@ class FilterListBuilder extends Loggable
             $db->execute("DROP TEMPORARY TABLE IF EXISTS $this->filterTemporaryTable");
         }
 
-        $endTime = time();
-        $journalHelper->markAsDone(date("Y-m-d h:i:s", $startTime), date("Y-m-d h:i:s", $endTime));
+        $endTime = microtime(true);
+        $journalHelper->markAsDone(date("Y-m-d h:i:s", (int)$startTime), date("Y-m-d h:i:s", (int)$endTime));
 
         $this->logger->notice(
             'end',
