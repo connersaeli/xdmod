@@ -30,4 +30,5 @@ security:
                     - 'header'
                     - 'query_string'
     access_control:
+        - { route: ccr_admin_resetusertourviewed, roles: 'mgr'}
         - { path: ^/, roles: PUBLIC_ACCESS}
