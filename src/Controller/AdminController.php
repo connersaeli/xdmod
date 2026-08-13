@@ -31,7 +31,6 @@ class AdminController extends BaseController
     #[Route('{prefix}reset_user_tour_viewed', requirements: ['prefix' => '.*'], methods: ['POST'])]
     public function resetUserTourViewed(Request $request): Response
     {
-        $this->denyAccessUnlessGranted('mgr');
         $viewedTour = $this->getIntParam($request, 'viewedTour', true);
         $selectedUser = XDUser::getUserByID(
             $this->getIntParam($request, 'uid', true)
