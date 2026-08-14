@@ -165,22 +165,10 @@ class OrganizationController extends BaseController
     #[Route('{prefix}organizations/members/{memberId}/upgrade', requirements: ['prefix' => '.*'], methods: ['POST'])]
     public function upgradeMember(Request $request, string $memberId): Response
     {
-        $this->logger->error('Upgrading Member Id: ' . var_export($memberId, true));
-        try {
-            $user = $this->getXDUser();
-            $this->logger->error('Successfully Authenticated requesting user has CD');
-        } catch (Exception $e) {
-            return $this->json(
-                [
-                    "status" => "not_a_center_director",
-                    "success" => false,
-                    "totalCount" => 0,
-                    "message" => "not_a_center_director",
-                    "data" => []
-                ]
-            );
-        }
-        $this->logger->error('Checking member id next.');
+        $this->logger->debug('Upgrading Member Id: ' . var_export($memberId, true));
+        $user = $this->getXDUser();
+
+        $this->logger->debug('Checking member id.');
         if (empty($memberId)) {
             return $this->json(buildError("Invalid value specified for 'member_id'."));
         }
@@ -190,13 +178,6 @@ class OrganizationController extends BaseController
         }
         $returnData = [];
 
-        // Ensure that the user performing this operation is authorized
-        if (!$user->hasAcl(ROLE_ID_CENTER_DIRECTOR) || !$user->getAccountStatus()) {
-            return $this->json([
-                'success' => false,
-                'message' => 'You are not authorized to perform this action'
-            ]);
-        }
         $organization = $user->getActiveOrganization();
         $memberUserId = $member->getUserID();
 
@@ -237,19 +218,7 @@ class OrganizationController extends BaseController
     #[Route('{prefix}organizations/members/{memberId}/downgrade', requirements: ['prefix' => '.*'], methods: ['POST'])]
     public function downgradeMember(Request $request, ?string $memberId): Response
     {
-        try {
-            $user = $this->getXDUser();
-        } catch (Exception $e) {
-            return $this->json(
-                [
-                    "status" => "not_a_center_director",
-                    "success" => false,
-                    "totalCount" => 0,
-                    "message" => "not_a_center_director",
-                    "data" => []
-                ]
-            );
-        }
+        $user = $this->getXDUser();
 
         if (empty($memberId)) {
             return $this->json(buildError("Invalid value specified for 'member_id'."));

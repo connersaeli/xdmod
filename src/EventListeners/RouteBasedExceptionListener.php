@@ -48,7 +48,17 @@ class RouteBasedExceptionListener
                     'code' => 2
                 ]));
             }
-            return;
+        } elseif ($route == 'ccr_organization_upgrademember' || $route == 'ccr_organization_downgrademember') {
+            if ($exception instanceof UnauthorizedHttpException) {
+                $event->setResponse(new JsonReponse([
+                    "status" => "not_a_center_director",
+                    "success" => false,
+                    "totalCount" => 0,
+                    "message" => "not_a_center_director",
+                    "data" => []
+                ]));
+            }
         }
+        return;
     }
 }
