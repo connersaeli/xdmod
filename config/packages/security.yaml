@@ -14,6 +14,11 @@ security:
             security: false
         main:
             lazy: true
+            access_token:
+                token_handler: CCR\Security\TokenHandlers\TokenHandler
+                token_extractors:
+                    - 'header'
+                    - 'query_string'
             provider: username_provider
             custom_authenticators:
                 - CCR\Security\Authenticators\FormLoginAuthenticator
@@ -24,11 +29,6 @@ security:
               enable_csrf: true
             access_denied_handler: CCR\Security\AccessDeniedHandler
             entry_point: CCR\Security\Authenticators\FormLoginAuthenticator
-            access_token:
-                token_handler: CCR\Security\TokenHandlers\JSONWebTokenHandler
-                token_extractors:
-                    - 'header'
-                    - 'query_string'
     access_control:
         - { route: ccr_internaldashboard_internaldashboard_index, roles: 'ROLE_ADMIN'}
         - { route: legacy_internal_dashboard_controllers, methods: ['GET', 'POST'], roles: 'ROLE_ADMIN'}
