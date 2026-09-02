@@ -30,5 +30,9 @@ security:
                     - 'header'
                     - 'query_string'
     access_control:
-        - { route: ccr_admin_resetusertourviewed, methods: POST, roles: 'mgr'}
+        - { route: ccr_internaldashboard_internaldashboard_index, roles: 'ROLE_ADMIN'}
+        - { route: legacy_internal_dashboard_controllers, methods: ['GET', 'POST'], roles: 'ROLE_ADMIN'}
+        - { route: ccr_internaldashboard_internaldashboard_getmenus, methods: 'POST', roles: 'ROLE_ADMIN'}
+        - { route: ccr_internaldashboard_sabuser_index, roles: 'ROLE_ADMIN'}
+        - { route: ccr_admin_resetusertourviewed, methods: 'POST', roles: 'ROLE_ADMIN'}
         - { path: ^/, roles: PUBLIC_ACCESS}

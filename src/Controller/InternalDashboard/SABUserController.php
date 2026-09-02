@@ -21,7 +21,6 @@ class SABUserController extends BaseController
     #[Route('/controllers/sab_user.php')]
     public function index(Request $request): Response
     {
-        $this->denyAccessUnlessGranted('mgr');
         $user = $this->getXDUser();
 
         $operation = $this->getStringParam($request, 'operation', true);
