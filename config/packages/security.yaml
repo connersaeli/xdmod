@@ -28,7 +28,7 @@ security:
               path: /logout
               enable_csrf: true
             access_denied_handler: CCR\Security\AccessDeniedHandler
-            entry_point: CCR\Security\Authenticators\FormLoginAuthenticator
+            entry_point: Symfony\Component\Security\Http\Authenticator\AccessTokenAuthenticator
     access_control:
         - { route: ccr_internaldashboard_internaldashboard_index, roles: 'ROLE_ADMIN'}
         - { route: legacy_internal_dashboard_controllers, methods: ['GET', 'POST'], roles: 'ROLE_ADMIN'}
