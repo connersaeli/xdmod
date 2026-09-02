@@ -34,5 +34,12 @@ security:
         - { route: legacy_internal_dashboard_controllers, methods: ['GET', 'POST'], roles: 'ROLE_ADMIN'}
         - { route: ccr_internaldashboard_internaldashboard_getmenus, methods: 'POST', roles: 'ROLE_ADMIN'}
         - { route: ccr_internaldashboard_sabuser_index, roles: 'ROLE_ADMIN'}
+        - { route: ccr_internaldashboard_internaldashboard_usercontroller, methods: 'POST', roles: 'ROLE_ADMIN'}
+        - { route: ccr_internaldashboard_useradmin_listusers, methods: 'POST', roles: 'ROLE_ADMIN'}
+        - { route: ccr_internaldashboard_useradmin_getusermetadata, methods: 'GET', roles: 'ROLE_ADMIN'}
+        - { route: ccr_internaldashboard_useradmin_updateuser, methods: 'POST', roles: 'ROLE_ADMIN'}
+        - { route: ccr_internaldashboard_useradmin_updateuser, methods: 'POST', roles: 'ROLE_ADMIN'}
+        - { route: ccr_internaldashboard_useradmin_searchforuser, methods: 'POST', roles: 'ROLE_ADMIN'}
+        - { route: ccr_internaldashboard_useradmin_passwordreset, methods: 'POST', roles: 'ROLE_ADMIN'}
         - { route: ccr_admin_resetusertourviewed, methods: 'POST', roles: 'ROLE_ADMIN'}
         - { path: ^/, roles: PUBLIC_ACCESS}

@@ -16,7 +16,7 @@ use CCR\DB;
 use XDUser;
 use Models\Services\JsonWebToken;
 
-class JSONWebTokenHandler implements AccessTokenHandlerInterface
+class TokenHandler implements AccessTokenHandlerInterface
 {
     const MISSING_TOKEN_MESSAGE = 'No token provided.';
     const INVALID_TOKEN_MESSAGE = 'Invalid token.';
