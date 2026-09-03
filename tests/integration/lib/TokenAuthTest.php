@@ -198,6 +198,7 @@ abstract class TokenAuthTest extends BaseTest
             $input['params'] = [];
         }
         $input['params']['Bearer'] = $token;
+        $helper->logout();
 
         // Make the request and validate the response.
         $actualBody = parent::requestAndValidateJson(
