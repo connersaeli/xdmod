@@ -56,48 +56,6 @@ class BaseController extends AbstractController
     }
 
     /**
-     * Will attempt to authorize the provided users' roles against the  provided array of role requirements.
-     *
-     * If the user is not authorized, an exception will be thrown. Otherwise, the function will simply return the
-     * authorized user.
-     *
-     * @param Request $request    the current HTTP request object.
-     * @param array $requiredAcls either an array of Acl objects or their equivalent string representations that are
-     *                            required for access to a given feature.
-     * @param bool $anyAcl        default false. If true then the requesting user will be considered authorized if there
-     *                            is any overlap in the requirements and the users currently assigned acls. If false,
-     *                            the requesting user will only be considered authorized if they have *all* of the
-     *                            specified $requiredAcls.
-     *
-     * @return XDUser the currently logged in, authorized user.
-     *
-     * @throws UnauthorizedHttpException if no requirements are provided and there is no currently logged in user or if
-     *                                   requirements are provided but not met by the public user.
-     * @throws AccessDeniedHttpException if the currently logged in user is unable to fulfill the provided requirements.
-     * @throws Exception if any of the values supplied within $requirements are not valid Acls objects or string
-     *                   representations of Acl objects.
-     */
-    public function authorize(Request $request, array $requiredAcls = [], bool $anyAcl = false): XDUser
-    {
-        $xdUser = $this->getXDUser();
-
-        $isPublicUser = $xdUser->isPublicUser();
-        if ($anyAcl) {
-            $authorized = count(array_intersect($xdUser->getAclNames(), $requiredAcls)) > 0;
-        } else {
-            $authorized = $xdUser->hasAcls($requiredAcls);
-        }
-
-        if (!$authorized && !$isPublicUser) {
-            throw new AccessDeniedHttpException(self::EXCEPTION_MESSAGE);
-        } elseif (!$authorized && $isPublicUser) {
-            throw new UnauthorizedHttpException('xdmod', self::EXCEPTION_MESSAGE);
-        }
-
-        return $xdUser;
-    }
-
-    /**
      *  DELETE ME
      *  Used in place for now because the controllers act on an XDUser
      * Retrieve the XDMoD user

@@ -32,6 +32,17 @@ class RouteBasedExceptionListener
 
         $exception = $event->getThrowable();
 
+        $defaultResponse = new JsonResponse([
+            'success' => false,
+            'count' => 0,
+            'total' => 0,
+            'totalCount' => 0,
+            'results' => array(),
+            'data' => array(),
+            'message' => 'Session Expired',
+            'code' => 2
+        ]);
+
         // Support Legacy format for the Internal Dashboard controller endpoints
         if (str_starts_with($route, 'ccr_internaldashboard')) {
             if ($exception instanceof AccessDeniedHttpException || $exception instanceof AccessDeniedException) {
@@ -68,16 +79,7 @@ class RouteBasedExceptionListener
                 $event->setResponse(new JsonResponse($content, $statusCode));
 
             } elseif ($exception instanceof UnauthorizedHttpException) {
-                $event->setResponse(new JsonResponse([
-                    'success' => false,
-                    'count' => 0,
-                    'total' => 0,
-                    'totalCount' => 0,
-                    'results' => array(),
-                    'data' => array(),
-                    'message' => 'Session Expired',
-                    'code' => 2
-                ]));
+                $event->setResponse($defaultResponse);
             }
         } elseif ($route == 'ccr_organization_upgrademember' || $route == 'ccr_organization_downgrademember') {
             if ($exception instanceof UnauthorizedHttpException) {
@@ -89,7 +91,10 @@ class RouteBasedExceptionListener
                     "data" => []
                 ]));
             }
+        } elseif ($route == 'ccr_metricexplorer_getdwdescriptors') {
+            $event->setResponse($defaultResponse);
         }
+
         return;
     }
 }

@@ -472,6 +472,10 @@ class MetricExplorerController extends BaseController
     {
         $user = $this->getXDUser();
 
+        if ($user->isPublicUser()) {
+            throw $this->createAccessDeniedException('');
+        }
+
         $roles = $user->getAllRoles(true);
 
         $roleDescriptors = array();
