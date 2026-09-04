@@ -3,6 +3,7 @@
 namespace CCR\Controller\InternalDashboard;
 
 use CCR\Controller\BaseController;
+use CCR\Security\Attributes\MgrRequired;
 use Exception;
 use Models\Services\Acls;
 use Symfony\Component\HttpFoundation\Request;
@@ -18,6 +19,7 @@ class SABUserController extends BaseController
      * @return Response
      * @throws Exception
      */
+    #[MgrRequired]
     #[Route('/controllers/sab_user.php')]
     public function index(Request $request): Response
     {

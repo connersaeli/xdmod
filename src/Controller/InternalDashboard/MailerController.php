@@ -4,6 +4,7 @@ namespace CCR\Controller\InternalDashboard;
 
 use CCR\DB;
 use CCR\MailWrapper;
+use CCR\Security\Attributes\MgrRequired;
 use Exception;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -18,7 +19,7 @@ class MailerController extends \CCR\Controller\BaseController
      * @return Response
      * @throws Exception
      */
-    #[IsGranted('ROLE_ADMIN')]
+    #[MgrRequired]
     #[Route('/internal_dashboard/controllers/mailer.php', name: 'legacy_dashboard_mailer_index', methods: ['POST'])]
     public function index(Request $request): Response
     {
