@@ -367,6 +367,10 @@ class MetricExplorerController extends BaseController
     {
         $operation = $this->getStringParam($request, 'operation', true);
 
+        if (!$this->getUser()) {
+            throw $this->createAccessDeniedException('');
+        }
+
         try {
             switch ($operation) {
                 case 'get_data':
@@ -471,10 +475,6 @@ class MetricExplorerController extends BaseController
     public function getDwDescriptors(Request $request): Response
     {
         $user = $this->getXDUser();
-
-        if ($user->isPublicUser()) {
-            throw $this->createAccessDeniedException('');
-        }
 
         $roles = $user->getAllRoles(true);
 

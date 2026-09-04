@@ -91,8 +91,8 @@ class RouteBasedExceptionListener
                     "data" => []
                 ]));
             }
-        } elseif ($route == 'ccr_metricexplorer_getdwdescriptors') {
-            $event->setResponse($defaultResponse);
+        } elseif (str_starts_with($route, 'ccr_metricexplorer_')) {
+            $event->setResponse($defaultResponse, Response::HTTP_UNAUTHORIZED);
         }
 
         return;
