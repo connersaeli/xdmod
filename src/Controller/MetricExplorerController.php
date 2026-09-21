@@ -44,6 +44,7 @@ class MetricExplorerController extends BaseController
      * @return Response
      * @throws Exception
      */
+    #[IsGranted('ROLE_USER')]
     #[Route('{prefix}metrics/explorer/queries', requirements: ['prefix' => '.*'], methods: ['GET'])]
     public function getQueries(Request $request): Response
     {
