@@ -93,7 +93,10 @@ class RouteBasedExceptionListener
             }
         } elseif (str_starts_with($route, 'ccr_metricexplorer_')) {
             $event->setResponse($defaultResponse, Response::HTTP_UNAUTHORIZED);
+        } elseif (str_starts_with($route, 'ccr_warehouse_')) {
+            $event->setResponse($defaultResponse, Response::HTTP_UNAUTHORIZED);
         }
+
 
         return;
     }
