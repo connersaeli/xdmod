@@ -748,6 +748,7 @@ class WarehouseController extends BaseController
      *                  the dimensions retrieved.
      * @throws Exception if a XDMoD user cannot be found for the currently logged in users username.
      */
+    #[IsGranted('ROLE_USER')]
     #[Route('{prefix}warehouse/dimensions', requirements: ['prefix' => '.*'],  methods: ['GET'])]
     #[Route('/warehouse/dimensions',  methods: ['GET'])]
     public function getDimensions(Request $request): Response
