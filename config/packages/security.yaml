@@ -19,6 +19,7 @@ security:
                 token_extractors:
                     - 'header'
                     - 'query_string'
+                    - 'request_body'
             provider: username_provider
             custom_authenticators:
                 - CCR\Security\Authenticators\FormLoginAuthenticator

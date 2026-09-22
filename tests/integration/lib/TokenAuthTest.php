@@ -197,7 +197,7 @@ abstract class TokenAuthTest extends BaseTest
         if (is_null($input['params'])) {
             $input['params'] = [];
         }
-        $input['params']['Bearer'] = $token;
+        $input['params']['access_token'] = $token;
         $helper->logout();
 
         // Make the request and validate the response.
