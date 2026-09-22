@@ -108,6 +108,8 @@ SQL;
             if (count($row) !== 1) {
                 self::throwUnauthorized(self::INVALID_TOKEN_MESSAGE);
             }
+        } else {
+            self::throwUnauthorized(self::INVALID_TOKEN_MESSAGE);
         }
         return new UserBadge($username);
     }
