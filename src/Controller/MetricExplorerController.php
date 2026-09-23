@@ -46,7 +46,7 @@ class MetricExplorerController extends BaseController
      * @return Response
      * @throws Exception
      */
-    #[NoPublicAllowed]
+    #[IsGranted('ROLE_USER')]
     #[Route('{prefix}metrics/explorer/queries', requirements: ['prefix' => '.*'], methods: ['GET'])]
     public function getQueries(Request $request): Response
     {
@@ -92,7 +92,7 @@ class MetricExplorerController extends BaseController
      * @param string $queryId
      * @return Response
      */
-    #[NoPublicAllowed]
+    #[IsGranted('ROLE_USER')]
     #[Route('{prefix}metrics/explorer/queries/{queryId}', requirements: ["queryId"=>"\w+", 'prefix' => '.*'], methods: ['GET'])]
     public function getQueryByid(Request $request, string $queryId): Response
     {
@@ -139,6 +139,7 @@ class MetricExplorerController extends BaseController
      * @param Request $request
      * @return Response
      */
+    #[IsGranted('ROLE_USER')]
     #[Route('{prefix}metrics/explorer/queries', requirements: ['prefix' => '.*'], methods: ['POST'])]
     public function createQuery(Request $request): Response
     {
@@ -195,6 +196,7 @@ class MetricExplorerController extends BaseController
      * @param string $queryId
      * @return Response
      */
+    #[IsGranted('ROLE_USER')]
     #[Route('{prefix}metrics/explorer/queries/{queryId}', requirements: ["queryId"=> "\w+", 'prefix' => '.*'], methods: ['PUT', "POST"])]
     public function updateQueryById(Request $request, string $queryId): Response
     {
@@ -272,6 +274,7 @@ class MetricExplorerController extends BaseController
      * @param string $queryId
      * @return Response
      */
+    #[IsGranted('ROLE_USER')]
     #[Route('{prefix}metrics/explorer/queries/{queryId}', requirements: ["queryId"=> "\w+", 'prefix' => '.*'], methods: ['DELETE'])]
     public function deleteQueryById(Request $request, string $queryId): Response
     {
