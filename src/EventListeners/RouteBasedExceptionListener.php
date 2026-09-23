@@ -81,7 +81,11 @@ class RouteBasedExceptionListener
             } elseif ($exception instanceof UnauthorizedHttpException) {
                 $event->setResponse($defaultResponse);
             }
-        } elseif ($route == 'ccr_organization_upgrademember' || $route == 'ccr_organization_downgrademember') {
+        } elseif (
+            $route == 'ccr_organization_upgrademember' ||
+            $route == 'ccr_organization_downgrademember' ||
+            $route == 'ccr_organization_index'
+        ) {
             if ($exception instanceof AccessDeniedHttpException) {
                 $event->setResponse(new JsonReponse([
                     "status" => "not_a_center_director",
