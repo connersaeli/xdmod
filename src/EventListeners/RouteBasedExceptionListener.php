@@ -45,7 +45,7 @@ class RouteBasedExceptionListener
 
         // Support Legacy format for the Internal Dashboard controller endpoints
         if (str_starts_with($route, 'ccr_internaldashboard')) {
-            if ($exception instanceof AccessDeniedHttpException || $exception instanceof AccessDeniedException) {
+            if ($exception instanceof UnauthorizedHttpException || $exception instanceof AccessDeniedException) {
                 $statusCode = Response::HTTP_OK;
                 $content = [
                     'status' => 'not_a_manager',
@@ -87,13 +87,14 @@ class RouteBasedExceptionListener
             $route == 'ccr_organization_index'
         ) {
             if ($exception instanceof AccessDeniedHttpException) {
-                $event->setResponse(new JsonResponse([
+                $not_cd_response = [
                     "status" => "not_a_center_director",
                     "success" => false,
                     "totalCount" => 0,
                     "message" => "not_a_center_director",
                     "data" => []
-                ]));
+                ];
+                $event->setResponse(new JsonResponse($not_cd_response, Response::HTTP_OK));
             }
         } elseif (str_starts_with($route, 'ccr_metricexplorer_')) {
             $event->setResponse($defaultResponse, Response::HTTP_UNAUTHORIZED);
