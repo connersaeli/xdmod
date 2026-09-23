@@ -65,12 +65,46 @@ class UserController extends BaseController
      * @return Response
      * @throws \Exception
      */
+    #[IsGranted('ROLE_USER')]
     #[Route("{prefix}users/current", name: "get_current_user", requirements: ['prefix' => '.*'], methods: ["GET"])]
     public function getCurrentUser(Request $request)
     {
+        $user = XDUser::getUserByUserName($this->getUser()->getUserIdentifier())
+        $emailAddress = $user->getEmailAddress();
+        if ($emailAddress == NO_EMAIL_ADDRESS_SET) {
+            $emailAddress = '';
+        }
+        $mostPrivileged = $user->getMostPrivilegedRole();
+        $mostPrivilegedFormalName = $mostPrivileged->getDisplay();
+        if (count(array_intersect(XDUser::$CENTER_ACLS, $user->getAcls(true))) > 0) {
+            $organization = Organizations::getAbbrevById($user->getOrganizationID());
+            $mostPrivilegedFormalName = "$mostPrivilegedFormalName - $organization";
+        }
+        $rawRealmConfig = \DataWarehouse\Access\RawData::getRawDataRealms($user);
+        $rawDataRealms = array_map(
+            function ($item) {
+                return $item['name'];
+            },
+            $rawRealmConfig
+        );
+
+        $results = [
+            'first_name' => $user->getFirstName(),
+            'last_name' => $user->getLastName(),
+            'email_address' => $emailAddress,
+            'is_sso_user' => $user->isSSOUser(),
+            'first_time_login' => $user->getCreationTimestamp() == $user->getLastLoginTimestamp(),
+            'autoload_suppression' => $request->getSession()->get('suppress_profile_autoload', false),
+            'field_of_science' => $user->getFieldOfScience(),
+            'active_role' => $mostPrivilegedFormalName,
+            'most_privileged_role' => $mostPrivilegedFormalName,
+            'person_id' => $user->getPersonID(true),
+            'raw_data_allowed_realms' => $rawDataRealms
+        ];
+
         return $this->json([
             'success' => true,
-            'results' => $this->extractUserData($request->getSession(), XDUser::getUserByUserName($this->getUser()->getUserIdentifier()))
+            'results' => $results
         ]);
     }
 
@@ -188,50 +222,6 @@ class UserController extends BaseController
 
         // If the `revokeToken` failed for some reason then we let the user know.
         throw new \Exception('Unable to revoke API token.');
-    }
-
-    /**
-     * Extract information from a user object.
-     *
-     * Ported from: classes/REST/Portal/Profile.php
-     *
-     * @param XDUser $user The user object to extract data from.
-     * @return array        An associative array of data for the user.
-     * @throws \Exception
-     */
-    private function extractUserData(Session $session, XDUser $user)
-    {
-        $emailAddress = $user->getEmailAddress();
-        if ($emailAddress == NO_EMAIL_ADDRESS_SET) {
-            $emailAddress = '';
-        }
-        $mostPrivileged = $user->getMostPrivilegedRole();
-        $mostPrivilegedFormalName = $mostPrivileged->getDisplay();
-        if (count(array_intersect(XDUser::$CENTER_ACLS, $user->getAcls(true))) > 0) {
-            $organization = Organizations::getAbbrevById($user->getOrganizationID());
-            $mostPrivilegedFormalName = "$mostPrivilegedFormalName - $organization";
-        }
-        $rawRealmConfig = \DataWarehouse\Access\RawData::getRawDataRealms($user);
-        $rawDataRealms = array_map(
-            function ($item) {
-                return $item['name'];
-            },
-            $rawRealmConfig
-        );
-
-        return [
-            'first_name' => $user->getFirstName(),
-            'last_name' => $user->getLastName(),
-            'email_address' => $emailAddress,
-            'is_sso_user' => $user->isSSOUser(),
-            'first_time_login' => $user->getCreationTimestamp() == $user->getLastLoginTimestamp(),
-            'autoload_suppression' => $session->get('suppress_profile_autoload', false),
-            'field_of_science' => $user->getFieldOfScience(),
-            'active_role' => $mostPrivilegedFormalName,
-            'most_privileged_role' => $mostPrivilegedFormalName,
-            'person_id' => $user->getPersonID(true),
-            'raw_data_allowed_realms' => $rawDataRealms
-        ];
     }
 
     /**
