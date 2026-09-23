@@ -19,6 +19,7 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\Security\Http\Attribute\NoPublicAllowed;
 use XDUser;
 use function xd_response\buildError;
 
@@ -45,7 +46,7 @@ class MetricExplorerController extends BaseController
      * @return Response
      * @throws Exception
      */
-    #[IsGranted('ROLE_USER')]
+    #[NoPublicAllowed]
     #[Route('{prefix}metrics/explorer/queries', requirements: ['prefix' => '.*'], methods: ['GET'])]
     public function getQueries(Request $request): Response
     {
@@ -91,6 +92,7 @@ class MetricExplorerController extends BaseController
      * @param string $queryId
      * @return Response
      */
+    #[NoPublicAllowed]
     #[Route('{prefix}metrics/explorer/queries/{queryId}', requirements: ["queryId"=>"\w+", 'prefix' => '.*'], methods: ['GET'])]
     public function getQueryByid(Request $request, string $queryId): Response
     {
