@@ -69,7 +69,7 @@ class UserController extends BaseController
     #[Route("{prefix}users/current", name: "get_current_user", requirements: ['prefix' => '.*'], methods: ["GET"])]
     public function getCurrentUser(Request $request)
     {
-        $user = XDUser::getUserByUserName($this->getUser()->getUserIdentifier());
+        $user = $this->getXDUser();
         $emailAddress = $user->getEmailAddress();
         if ($emailAddress == NO_EMAIL_ADDRESS_SET) {
             $emailAddress = '';
