@@ -95,6 +95,8 @@ class RouteBasedExceptionListener
             $event->setResponse($defaultResponse, Response::HTTP_UNAUTHORIZED);
         } elseif (str_starts_with($route, 'ccr_warehouse_')) {
             $event->setResponse($defaultResponse, Response::HTTP_UNAUTHORIZED);
+        } elseif (str_starts_with($route, 'ccr_userinterface_') || $route == 'legacy_user_interface') {
+            $event->setResponse($defaultResponse, Response::HTTP_UNAUTHORIZED);
         }
 
 
