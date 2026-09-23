@@ -85,6 +85,7 @@ class OrganizationController extends BaseController
      * @throws Exception
      */
     // TODO needs something like IsGranted('center_related_acls')
+    #[CenterDirectorRequired]
     #[Route('{prefix}organizations/members', requirements: ['prefix' => '.*'], methods: ['POST'])]
     public function getMembers(Request $request): Response
     {
@@ -162,7 +163,7 @@ class OrganizationController extends BaseController
      * @return Response
      * @throws Exception
      */
-    #[IsGranted('ROLE_ID_CENTER_DIRECTOR')]
+    #[CenterDirectorRequired]
     #[Route('{prefix}organizations/members/{memberId}/upgrade', requirements: ['prefix' => '.*'], methods: ['POST'])]
     public function upgradeMember(Request $request, string $memberId): Response
     {
@@ -215,7 +216,7 @@ class OrganizationController extends BaseController
      * @return Response
      * @throws Exception
      */
-    #[IsGranted('ROLE_ID_CENTER_DIRECTOR')]
+    #[CenterDirectorRequired]
     #[Route('{prefix}organizations/members/{memberId}/downgrade', requirements: ['prefix' => '.*'], methods: ['POST'])]
     public function downgradeMember(Request $request, ?string $memberId): Response
     {
