@@ -117,7 +117,7 @@ class OrganizationController extends BaseController
 
         $member = XDUser::getUserByID($memberId);
         if ($member === null) {
-            return $this->json(\xd_response\buildError('user_does_not_exist'));
+            return $this->json(buildError('user_does_not_exist'));
         }
 
         $returnData = [
@@ -175,7 +175,7 @@ class OrganizationController extends BaseController
         }
         $member = XDUser::getUserByID($memberId);
         if ($member === null) {
-            return $this->json(\xd_response\buildError('user_does_not_exist'));
+            return $this->json(buildError('user_does_not_exist'));
         }
         $returnData = [];
 
@@ -184,7 +184,7 @@ class OrganizationController extends BaseController
 
         // An eligible user must be associated with the currently logged in users center.
         if (!Users::userIsAssociatedWithCenter($memberUserId, $organization)) {
-            $this->json(\xd_response\buildError('center_mismatch_between_member_and_director'));
+            $this->json(buildError('center_mismatch_between_member_and_director'));
         }
 
         // They must not already be a Center Director for the organization.
@@ -233,7 +233,7 @@ class OrganizationController extends BaseController
 
         $member = XDUser::getUserByID($memberId);
         if ($member === null) {
-            return $this->json(\xd_response\buildError('user_does_not_exist'));
+            return $this->json(buildError('user_does_not_exist'));
         }
 
         $organization = $user->getOrganizationID();
@@ -241,7 +241,7 @@ class OrganizationController extends BaseController
 
         // An eligible user must be associated with the currently logged in users center.
         if (!Users::userIsAssociatedWithCenter($memberUserId, $organization)) {
-            return $this->json(\xd_response\buildError('center_mismatch_between_member_and_director'));
+            return $this->json(buildError('center_mismatch_between_member_and_director'));
         }
 
         Users::demoteUserFromCenterStaff($member, $organization);
