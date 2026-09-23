@@ -87,7 +87,7 @@ class RouteBasedExceptionListener
             $route == 'ccr_organization_index'
         ) {
             if ($exception instanceof AccessDeniedHttpException) {
-                $event->setResponse(new JsonReponse([
+                $event->setResponse(new JsonResponse([
                     "status" => "not_a_center_director",
                     "success" => false,
                     "totalCount" => 0,
