@@ -31,6 +31,7 @@ class RouteBasedExceptionListener
         $route = $request->attributes->get('_route');
 
         $exception = $event->getThrowable();
+        $event->allowCustomResponseCode();
 
         $defaultResponse = new JsonResponse([
             'success' => false,
@@ -45,7 +46,7 @@ class RouteBasedExceptionListener
 
         // Support Legacy format for the Internal Dashboard controller endpoints
         if (str_starts_with($route, 'ccr_internaldashboard')) {
-            if ($exception instanceof UnauthorizedHttpException || $exception instanceof AccessDeniedException) {
+            if ($exception instanceof AccessDeniedHttpException || $exception instanceof AccessDeniedException) {
                 $statusCode = Response::HTTP_OK;
                 $content = [
                     'status' => 'not_a_manager',
@@ -75,7 +76,6 @@ class RouteBasedExceptionListener
                     $statusCode = Response::HTTP_UNAUTHORIZED;
                 }
 
-                $event->allowCustomResponseCode();
                 $event->setResponse(new JsonResponse($content, $statusCode));
 
             } elseif ($exception instanceof UnauthorizedHttpException) {
@@ -87,14 +87,14 @@ class RouteBasedExceptionListener
             $route == 'ccr_organization_index'
         ) {
             if ($exception instanceof AccessDeniedHttpException) {
-                $not_cd_response = [
+                $not_cd_response = new JsonResponse([
                     "status" => "not_a_center_director",
                     "success" => false,
                     "totalCount" => 0,
                     "message" => "not_a_center_director",
                     "data" => []
-                ];
-                $event->setResponse(new JsonResponse($not_cd_response, Response::HTTP_OK));
+                ], Response::HTTP_OK);
+                $event->setResponse($not_cd_response);
             }
         } elseif (str_starts_with($route, 'ccr_metricexplorer_')) {
             $event->setResponse($defaultResponse, Response::HTTP_UNAUTHORIZED);
