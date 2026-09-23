@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace CCR\Controller;
 
 use Exception;
+use CCR\Security\Attributes\CenterDirectorRequired;
 use Models\Services\Centers;
 use Models\Services\Users;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
@@ -26,7 +27,7 @@ class OrganizationController extends BaseController
      * @return Response
      * @throws Exception
      */
-    #[IsGranted('ROLE_ID_CENTER_DIRECTOR')]
+    #[CenterDirectorRequired]
     #[Route('/controllers/role_manager.php')]
     public function index(Request $request): Response
     {
