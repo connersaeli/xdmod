@@ -44,6 +44,8 @@ class RouteBasedExceptionListener
             'code' => 2
         ]);
 
+        $error_during_authorization_message = 'An error was encountered while attempting to process the requested authorization procedure.';
+
         // Support Legacy format for the Internal Dashboard controller endpoints
         if ($exception instanceof AccessDeniedHttpException || $exception instanceof AccessDeniedException) {
             if (str_starts_with($route, 'ccr_internaldashboard_')) {
@@ -66,7 +68,7 @@ class RouteBasedExceptionListener
                             'totalCount' => 0,
                             'results' => [],
                             'data' => [],
-                            'message' => 'An error was encountered while attempting to process the requested authorization procedure.',
+                            'message' => $error_during_authorization_message,
                             'code' => 0
                         ];
                     }
@@ -91,6 +93,9 @@ class RouteBasedExceptionListener
                     "data" => []
                 ], Response::HTTP_OK);
                 $event->setResponse($not_cd_response);
+            } elseif ($route == 'legacy_user_interface') {
+                $defaultResponse->setStatusCode(Response::HTTP_UNAUTHORIZED);
+                $event->setResponse($defaultReponse);
             }
         } elseif ($exception instanceof UnauthorizedHttpException) {
             if (
@@ -101,6 +106,16 @@ class RouteBasedExceptionListener
             ) {
                 $defaultResponse->setStatusCode(Response::HTTP_UNAUTHORIZED);
                 $event->setResponse($defaultResponse);
+            }
+        } elseif ($exception instanceof HttpException) {
+            if (str_starts_with($route, 'ccr_reportbuilder_')) {
+                $response = new JsonResponse([
+                    "success" => false,
+                    "message" => $error_during_authorization_message,
+                    "exception" => get_class($exception)
+                ]);
+                $response->setStatusCode(Response::HTTP_UNAUTHORIZED);
+                $event->setResponse($response);
             }
         }
         return;
