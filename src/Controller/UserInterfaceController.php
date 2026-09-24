@@ -31,6 +31,7 @@ class UserInterfaceController extends BaseController
      * @return Response
      * @throws Exception
      */
+    #[IsGranted('ROLE_USER')]
     #[Route("/controllers/user_interface.php", name: "legacy_user_interface")]
     public function index(Request $request): Response
     {
