@@ -22,6 +22,7 @@ class ChartPoolController extends BaseController
      * @return Response
      * @throws Exception
      */
+    #[IsGranted('ROLE_USER')]
     #[Route('/controllers/chart_pool.php', methods: ['POST'])]
     #[Route('/chart_pool')]
     public function index(Request $request): Response
