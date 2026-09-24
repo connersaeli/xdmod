@@ -218,7 +218,7 @@ class InternalDashboardController extends BaseController
                 return $this->enumUserTypesAndRoles($request);
             case 'enum_user_visits':
             case 'enum_user_visits_export':
-                return $this->enumUserVisits($request);
+                return $this->enumUserVisits($request, $operation);
             case 'ak_rr':
                 return $this->akrr($request);
             case 'logout':
@@ -383,7 +383,7 @@ SQL;
      * @return Response
      * @throws Exception
      */
-    private function enumUserVisits(Request $request): Response
+    private function enumUserVisits(Request $request, string $operation): Response
     {
         $timeframe = strtolower($this->getStringParam($request, 'timeframe'));
         $userTypes = explode(',', $this->getStringParam($request, 'user_types'));
@@ -400,50 +400,54 @@ SQL;
             'stats' => \XDStatistics::getUserVisitStats($timeframe, $userTypes)
         ];
 
-        $response = new StreamedResponse(function () use ($data, $logger) {
-            $outputStream = fopen('php://output', 'wb');
+        if ($operation === 'enum_user_visits_export') {
+            $response = new StreamedResponse(function () use ($data, $logger) {
+                $outputStream = fopen('php://output', 'wb');
 
-            $content = array_map(
-                function ($item) {
-                    return implode(',', $item);
-                },
-                $data['stats']
+                $content = array_map(
+                    function ($item) {
+                        return implode(',', $item);
+                    },
+                    $data['stats']
+                );
+
+                // Add the header row.
+                array_unshift($content, implode(',', UserVisitController::$columns));
+
+                $written = fwrite(
+                    $outputStream,
+                    sprintf("%s\n", implode("\n", $content))
+                );
+                if ($written === false) {
+                    $logger->error('Unable to write bytes to output stream');
+                    exit(1);
+                }
+
+                $flushed = fflush($outputStream);
+                if ($flushed === false) {
+                    $logger->error('Unable to flush output stream');
+                    exit(1);
+                }
+
+                $closed = fclose($outputStream);
+                if ($closed === false) {
+                    $logger->error('Unable to close output stream');
+                    exit(1);
+                }
+            });
+
+            $response->headers->set('Content-Type', 'application/xls');
+            $response->headers->set(
+                'Content-Disposition',
+                HeaderUtils::makeDisposition(
+                    HeaderUtils::DISPOSITION_ATTACHMENT,
+                    "xdmod_visitation_stats_by_$timeframe.csv"
+                )
             );
 
-            // Add the header row.
-            array_unshift($content, implode(',', UserVisitController::$columns));
+            return $response;
+        }
 
-            $written = fwrite(
-                $outputStream,
-                sprintf("%s\n", implode("\n", $content))
-            );
-            if ($written === false) {
-                $logger->error('Unable to write bytes to output stream');
-                exit(1);
-            }
-
-            $flushed = fflush($outputStream);
-            if ($flushed === false) {
-                $logger->error('Unable to flush output stream');
-                exit(1);
-            }
-
-            $closed = fclose($outputStream);
-            if ($closed === false) {
-                $logger->error('Unable to close output stream');
-                exit(1);
-            }
-        });
-
-        $response->headers->set('Content-Type', 'application/xls');
-        $response->headers->set(
-            'Content-Disposition',
-            HeaderUtils::makeDisposition(
-                HeaderUtils::DISPOSITION_ATTACHMENT,
-                "xdmod_visitation_stats_by_$timeframe.csv"
-            )
-        );
-
-        return $response;
+        return new Response(json_encode($data));
     }
 }
