@@ -375,10 +375,6 @@ class MetricExplorerController extends BaseController
     {
         $operation = $this->getStringParam($request, 'operation', true);
 
-        if (!$this->getUser()) {
-            throw $this->createAccessDeniedException('');
-        }
-
         try {
             switch ($operation) {
                 case 'get_data':
@@ -409,6 +405,7 @@ class MetricExplorerController extends BaseController
      * @return Response
      * @throws Exception if there is a problem with the processing of the get_data function.
      */
+    #[IsGranted('ROLE_USER')]
     #[Route('{prefix}metrics/explorer/data', requirements: ['prefix' => '.*'], methods: ['POST', 'GET'])]
     public function getData(Request $request): Response
     {
@@ -439,6 +436,7 @@ class MetricExplorerController extends BaseController
      * @throws AccessDeniedException
      * @throws UnknownGroupByException
      */
+    #[IsGranted('ROLE_USER')]
     #[Route('{prefix}metrics/explorer/dimension/values', requirements: ['prefix' => '.*'], methods: ['POST'])]
     public function getDimensionValues(Request $request): Response
     {
@@ -479,6 +477,7 @@ class MetricExplorerController extends BaseController
      * @return Response
      * @throws Exception if unable to get the currently logged in user.
      */
+    #[IsGranted('ROLE_USER')]
     #[Route('{prefix}metrics/explorer/get_dw_descripter', requirements: ['prefix' => '.*'], methods: ['POST'])]
     public function getDwDescriptors(Request $request): Response
     {
@@ -630,6 +629,7 @@ class MetricExplorerController extends BaseController
      * @return Response
      * @throws Exception if unable to retrieve the currently logged in user.
      */
+    #[IsGranted('ROLE_USER')]
     #[Route('{prefix}metrics/explorer/filters', requirements: ['prefix' => '.*'], methods: ['POST'])]
     public function getFilters(Request $request): Response
     {
@@ -675,6 +675,7 @@ class MetricExplorerController extends BaseController
      * @return Response
      * @throws Exception if there is a problem retrieving a user for the request.
      */
+    #[IsGranted('ROLE_USER')]
     #[Route('{prefix}metrics/explorer/raw_data', requirements: ['prefix' => '.*'], methods: ['POST'])]
     public function getRawData(Request $request): Response
     {

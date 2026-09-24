@@ -45,48 +45,44 @@ class RouteBasedExceptionListener
         ]);
 
         // Support Legacy format for the Internal Dashboard controller endpoints
-        if (str_starts_with($route, 'ccr_internaldashboard')) {
-            if ($exception instanceof AccessDeniedHttpException || $exception instanceof AccessDeniedException) {
-                $statusCode = Response::HTTP_OK;
-                $content = [
-                    'status' => 'not_a_manager',
-                    'success' => false,
-                    'totalCount' => 0,
-                    'message' => 'not_a_manager',
-                    'data' => array()
-                ];
-
-                // For src/Controller/InternalDashboard/AdminController::resetUserTourViewed
-                if (str_ends_with($route, 'resetusertourviewed')) {
-                    $statusCode = Response::HTTP_FORBIDDEN;
+        if ($exception instanceof AccessDeniedHttpException || $exception instanceof AccessDeniedException) {
+            if (str_starts_with($route, 'ccr_internaldashboard')) {
+                    $statusCode = Response::HTTP_OK;
                     $content = [
+                        'status' => 'not_a_manager',
                         'success' => false,
-                        'count' => 0,
-                        'total' => 0,
                         'totalCount' => 0,
-                        'results' => [],
-                        'data' => [],
-                        'message' => 'An error was encountered while attempting to process the requested authorization procedure.',
-                        'code' => 0
+                        'message' => 'not_a_manager',
+                        'data' => array()
                     ];
-                }
 
-                // This is specifically for ControllerTest::testSabRejectsPublic, it expects a 401.
-                if (!$this->security->isGranted('IS_AUTHENTICATED_FULLY')) {
-                    $statusCode = Response::HTTP_UNAUTHORIZED;
-                }
+                    // For src/Controller/InternalDashboard/AdminController::resetUserTourViewed
+                    if (str_ends_with($route, 'resetusertourviewed')) {
+                        $statusCode = Response::HTTP_FORBIDDEN;
+                        $content = [
+                            'success' => false,
+                            'count' => 0,
+                            'total' => 0,
+                            'totalCount' => 0,
+                            'results' => [],
+                            'data' => [],
+                            'message' => 'An error was encountered while attempting to process the requested authorization procedure.',
+                            'code' => 0
+                        ];
+                    }
 
-                $event->setResponse(new JsonResponse($content, $statusCode));
+                    // This is specifically for ControllerTest::testSabRejectsPublic, it expects a 401.
+                    if (!$this->security->isGranted('IS_AUTHENTICATED_FULLY')) {
+                        $statusCode = Response::HTTP_UNAUTHORIZED;
+                    }
 
-            } elseif ($exception instanceof UnauthorizedHttpException) {
-                $event->setResponse($defaultResponse);
-            }
-        } elseif (
-            $route == 'ccr_organization_upgrademember' ||
-            $route == 'ccr_organization_downgrademember' ||
-            $route == 'ccr_organization_index'
-        ) {
-            if ($exception instanceof AccessDeniedHttpException) {
+                    $event->setResponse(new JsonResponse($content, $statusCode));
+
+            } elseif (
+                $route == 'ccr_organization_upgrademember' ||
+                $route == 'ccr_organization_downgrademember' ||
+                $route == 'ccr_organization_index'
+            ) {
                 $not_cd_response = new JsonResponse([
                     "status" => "not_a_center_director",
                     "success" => false,
@@ -96,15 +92,12 @@ class RouteBasedExceptionListener
                 ], Response::HTTP_OK);
                 $event->setResponse($not_cd_response);
             }
-        } elseif (str_starts_with($route, 'ccr_metricexplorer_')) {
-            $event->setResponse($defaultResponse, Response::HTTP_UNAUTHORIZED);
-        } elseif (str_starts_with($route, 'ccr_warehouse_')) {
-            $event->setResponse($defaultResponse, Response::HTTP_UNAUTHORIZED);
-        } elseif (str_starts_with($route, 'ccr_userinterface_') || $route == 'legacy_user_interface') {
-            $event->setResponse($defaultResponse, Response::HTTP_UNAUTHORIZED);
+        } elseif ($exception instanceof UnauthorizedHttpException) {
+            if ($route == 'ccr_metricexplorer_index') {
+                $defaultResponse->setStatusCode(Response::HTTP_UNAUTHORIZED)
+                $event->setResponse($defaultResponse);
+            }
         }
-
-
         return;
     }
 }
