@@ -13,6 +13,7 @@ use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use XDReportManager;
 use XDUser;
 use function xd_response\buildError;
@@ -32,6 +33,7 @@ class ReportBuilderController extends BaseController
      * @return Response
      * @throws Exception
      */
+    #[IsGranted('ROLE_USER')]
     #[Route('/controllers/report_builder.php', methods: ['POST', 'GET'])]
     public function index(Request $request): Response
     {
