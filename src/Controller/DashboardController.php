@@ -195,6 +195,7 @@ class DashboardController extends BaseController
      * property.
      * @throws Exception if there is a problem authorizing the current user.
      */
+    #[IsGranted('ROLE_USER')]
     #[Route('/layout', methods: ['POST'])]
     public function setLayout(Request $request): Response
     {
@@ -222,6 +223,7 @@ class DashboardController extends BaseController
      * @return Response
      * @throws Exception if there is a problem authorizing the current user.
      */
+    #[IsGranted('ROLE_USER')]
     #[Route('/layout', methods: ['DELETE'])]
     public function resetLayout(Request $request): Response
     {
@@ -245,6 +247,7 @@ class DashboardController extends BaseController
      * @throws BadRequestHttpException
      * @throws Exception
      */
+    #[IsGranted('ROLE_USER')]
     #[Route('/viewedUserTour', methods: ['POST'])]
     public function setViewedUserTour(Request $request): Response
     {
@@ -338,6 +341,7 @@ class DashboardController extends BaseController
      * @return Response
      * @throws Exception
      */
+    #[IsGranted('ROLE_USER')]
     #[Route('/viewedUserTour', methods: ['GET'])]
     public function getViewedUserTour(Request $request): Response
     {
@@ -357,6 +361,7 @@ class DashboardController extends BaseController
      * @return Response
      * @throws Exception if there is a problem authorizing the current user.
      */
+    #[IsGranted('ROLE_USER')]
     #[Route('/savedchartsreports', methods: ['GET'])]
     public function getSavedChartReports(Request $request): Response
     {
