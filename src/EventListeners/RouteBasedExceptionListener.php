@@ -57,7 +57,7 @@ class RouteBasedExceptionListener
                     ];
 
                     // For src/Controller/InternalDashboard/AdminController::resetUserTourViewed
-                    if (str_ends_with($route, 'resetusertourviewed_')) {
+                    if (str_ends_with($route, '_resetusertourviewed')) {
                         $statusCode = Response::HTTP_FORBIDDEN;
                         $content = [
                             'success' => false,
