@@ -94,7 +94,7 @@ class RouteBasedExceptionListener
             }
         } elseif ($exception instanceof UnauthorizedHttpException) {
             if ($route == 'ccr_metricexplorer_index') {
-                $defaultResponse->setStatusCode(Response::HTTP_UNAUTHORIZED)
+                $defaultResponse->setStatusCode(Response::HTTP_UNAUTHORIZED);
                 $event->setResponse($defaultResponse);
             }
         }
