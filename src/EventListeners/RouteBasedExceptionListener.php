@@ -98,12 +98,6 @@ class RouteBasedExceptionListener
                 $response = new JsonResponse($defaultContent);
                 $response->setStatusCode(Response::HTTP_UNAUTHORIZED);
                 $event->setResponse($response);
-            } elseif (str_starts_with($route, 'ccr_warehouseexport_')) {
-                $defaultContent['message'] = $error_during_authorization_message;
-                $defaultContent['code'] = 0;
-                $response = new JsonResponse($defaultContent);
-                $response->setStatusCode(Response::HTTP_UNAUTHORIZED);
-                $event->setResponse($response);
             }
         } elseif ($exception instanceof UnauthorizedHttpException) {
             if (
@@ -112,6 +106,12 @@ class RouteBasedExceptionListener
                 || str_starts_with($route, 'ccr_userinterface_')
                 || str_starts_with($route, 'ccr_reportbuilder_')
             ) {
+                $response = new JsonResponse($defaultContent);
+                $response->setStatusCode(Response::HTTP_UNAUTHORIZED);
+                $event->setResponse($response);
+            } elseif (str_starts_with($route, 'ccr_warehouseexport_')) {
+                $defaultContent['message'] = $error_during_authorization_message;
+                $defaultContent['code'] = 0;
                 $response = new JsonResponse($defaultContent);
                 $response->setStatusCode(Response::HTTP_UNAUTHORIZED);
                 $event->setResponse($response);
