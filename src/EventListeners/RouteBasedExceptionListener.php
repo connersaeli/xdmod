@@ -34,7 +34,7 @@ class RouteBasedExceptionListener
         $exception = $event->getThrowable();
         $event->allowCustomResponseCode();
 
-        $defaultResponse = new JsonResponse([
+        $defaultContent = [
             'success' => false,
             'count' => 0,
             'total' => 0,
@@ -43,7 +43,7 @@ class RouteBasedExceptionListener
             'data' => array(),
             'message' => 'Session Expired',
             'code' => 2
-        ]);
+        ];
 
         $error_during_authorization_message = 'An error was encountered while attempting to process the requested authorization procedure.';
 
@@ -95,12 +95,12 @@ class RouteBasedExceptionListener
                 ], Response::HTTP_OK);
                 $event->setResponse($not_cd_response);
             } elseif ($route == 'legacy_user_interface') {
-                $defaultResponse->setStatusCode(Response::HTTP_UNAUTHORIZED);
-                $event->setResponse($defaultReponse);
+                $response = new JsonResponse($defaultContent)->setStatusCode(Response::HTTP_UNAUTHORIZED);
+                $event->setResponse($defaultContent);
             } elseif (str_starts_with($route, 'ccr_warehouseexport_')) {
-                $defaultResponse['message'] = $error_during_authorization_message;
-                $defaultResponse['code'] = 0;
-                $response = new JsonResponse($defaultResponse);
+                $defaultContent['message'] = $error_during_authorization_message;
+                $defaultContent['code'] = 0;
+                $response = new JsonResponse($defaultContent);
                 $response->setStatusCode(Response::HTTP_UNAUTHORIZED);
                 $event->setResponse($response);
             }
@@ -111,20 +111,21 @@ class RouteBasedExceptionListener
                 || str_starts_with($route, 'ccr_userinterface_')
                 || str_starts_with($route, 'ccr_reportbuilder_')
             ) {
-                $defaultResponse->setStatusCode(Response::HTTP_UNAUTHORIZED);
-                $event->setResponse($defaultResponse);
+                $defaultContent->setStatusCode(Response::HTTP_UNAUTHORIZED);
+                $event->setResponse($defaultContent);
             }
         } elseif ($exception instanceof HttpException) {
             if (
                 str_starts_with($route, 'ccr_reportbuilder_')
             ) {
-                $defaultResponse['message'] = $error_during_authorization_message;
-                $defaultResponse['code'] = 0;
-                $response = new JsonResponse($defaultResponse);
+                $defaultContent['message'] = $error_during_authorization_message;
+                $defaultContent['code'] = 0;
+                $response = new JsonResponse($defaultContent);
                 $response->setStatusCode(Response::HTTP_UNAUTHORIZED);
                 $event->setResponse($response);
             }
         }
         return;
+
     }
 }
