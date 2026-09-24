@@ -95,7 +95,7 @@ class RouteBasedExceptionListener
                 ], Response::HTTP_OK);
                 $event->setResponse($not_cd_response);
             } elseif ($route == 'legacy_user_interface') {
-                $response = new JsonResponse($defaultContent)
+                $response = new JsonResponse($defaultContent);
                 $response->setStatusCode(Response::HTTP_UNAUTHORIZED);
                 $event->setResponse($response);
             } elseif (str_starts_with($route, 'ccr_warehouseexport_')) {
