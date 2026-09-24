@@ -31,7 +31,6 @@ class UserInterfaceController extends BaseController
      * @return Response
      * @throws Exception
      */
-    #[IsGranted('ROLE_USER')]
     #[Route("/controllers/user_interface.php", name: "legacy_user_interface")]
     public function index(Request $request): Response
     {
@@ -110,15 +109,11 @@ class UserInterfaceController extends BaseController
      * @return Response
      * @throws Exception
      */
+    #[IsGranted('ROLE_USER')]
     #[Route('{prefix}interfaces/user/charts', requirements: ['prefix' => '.*'],  methods: ['POST'])]
     public function getCharts(Request $request): Response
     {
         $user = $this->getXDUser();
-
-        $allowPublicUser = $request->get('public_user', false);
-        if ($user->isPublicUser() && !$allowPublicUser) {
-            return $this->json(buildError(new Exception('Session Expired', 2)), 401);
-        }
 
         // Send the request and user to the Usage-to-Metric Explorer adapter.
         $params = array_merge($request->query->all(), $request->request->all());
@@ -174,6 +169,7 @@ class UserInterfaceController extends BaseController
      * @return Response
      * @throws Exception
      */
+    #[IsGranted('ROLE_USER')]
     #[Route('{prefix}interfaces/user/data', requirements: ['prefix' => '.*'], methods: ['POST'])]
     public function getData(Request $request): Response
     {
