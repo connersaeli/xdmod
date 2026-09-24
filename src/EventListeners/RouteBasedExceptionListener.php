@@ -46,7 +46,7 @@ class RouteBasedExceptionListener
 
         // Support Legacy format for the Internal Dashboard controller endpoints
         if ($exception instanceof AccessDeniedHttpException || $exception instanceof AccessDeniedException) {
-            if (str_starts_with($route, 'ccr_internaldashboard')) {
+            if (str_starts_with($route, 'ccr_internaldashboard_')) {
                     $statusCode = Response::HTTP_OK;
                     $content = [
                         'status' => 'not_a_manager',
@@ -57,7 +57,7 @@ class RouteBasedExceptionListener
                     ];
 
                     // For src/Controller/InternalDashboard/AdminController::resetUserTourViewed
-                    if (str_ends_with($route, 'resetusertourviewed')) {
+                    if (str_ends_with($route, 'resetusertourviewed_')) {
                         $statusCode = Response::HTTP_FORBIDDEN;
                         $content = [
                             'success' => false,
@@ -79,9 +79,9 @@ class RouteBasedExceptionListener
                     $event->setResponse(new JsonResponse($content, $statusCode));
 
             } elseif (
-                $route == 'ccr_organization_upgrademember' ||
-                $route == 'ccr_organization_downgrademember' ||
-                $route == 'ccr_organization_index'
+                $route == 'ccr_organization_upgrademember'
+                || $route == 'ccr_organization_downgrademember'
+                || $route == 'ccr_organization_index'
             ) {
                 $not_cd_response = new JsonResponse([
                     "status" => "not_a_center_director",
@@ -93,7 +93,12 @@ class RouteBasedExceptionListener
                 $event->setResponse($not_cd_response);
             }
         } elseif ($exception instanceof UnauthorizedHttpException) {
-            if ($route == 'ccr_metricexplorer_index' || $route == 'legacy_user_interface') {
+            if (
+                $route == 'ccr_metricexplorer_index'
+                || $route == 'legacy_user_interface'
+                || str_starts_with($route, 'ccr_userinterface_')
+                || str_starts_with($route, 'ccr_reportbuilder_')
+            ) {
                 $defaultResponse->setStatusCode(Response::HTTP_UNAUTHORIZED);
                 $event->setResponse($defaultResponse);
             }
