@@ -20,12 +20,14 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Twig\Environment;
 use function xd_response\buildError;
 
 /**
  *
  */
+#[IsGranted('ROLE_USER')]
 #[Route('{prefix}warehouse/export', requirements: ['prefix' => '.*'])]
 class WarehouseExportController extends BaseController
 {
