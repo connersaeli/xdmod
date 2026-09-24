@@ -120,13 +120,30 @@ class UserController extends BaseController
     #[Route("{prefix}users/current", name: "update_current_user", requirements: ['prefix' => '.*'], methods: ["PATCH"])]
     public function updateCurrentUser(Request $request)
     {
-        // Ensure that the user is logged in.
-        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+        $requestProperties = array();
+        foreach (self::$userSettableProperties as $propertyName => $propertyType) {
+            $propertyValue = $request->get($propertyName);
+
+            if ($propertyValue === null) {
+                continue;
+            }
+
+            // Check to make sure that the property value type is what we expect.
+            if (get_debug_type($propertyValue) !== $propertyType) {
+                throw new BadRequestHttpException(
+                    sprintf(
+                        "Invalid value for $propertyName. Must be a(n) %s.",
+                        $propertyType
+                    )
+                );
+            }
+            $requestProperties[$propertyName] = $propertyValue;
+        }
 
         // Attempt to update the user's profile with the given information.
         $this->updateUser(
             XDUser::getUserByUserName($this->getUser()->getUserIdentifier()),
-            $this->extractUserSettableProperties($request)
+            $requestProperties
         );
 
         // If the last step completed successfully, hide the welcome message
@@ -227,37 +244,6 @@ class UserController extends BaseController
 
         // If the `revokeToken` failed for some reason then we let the user know.
         throw new \Exception('Unable to revoke API token.');
-    }
-
-    /**
-     * Extract user profile properties from a request that are allowed to be
-     * set by the user.
-     *
-     * @param Request $request The request to extract properties from.
-     * @return array            An array containing properties
-     */
-    private function extractUserSettableProperties(Request $request)
-    {
-        $requestProperties = array();
-        foreach (self::$userSettableProperties as $propertyName => $propertyType) {
-            $propertyValue = $request->get($propertyName);
-
-            if ($propertyValue === null) {
-                continue;
-            }
-
-            // Check to make sure that the property value type is what we expect.
-            if (get_debug_type($propertyValue) !== $propertyType) {
-                throw new BadRequestHttpException(
-                    sprintf(
-                        "Invalid value for $propertyName. Must be a(n) %s.",
-                        $propertyType
-                    )
-                );
-            }
-            $requestProperties[$propertyName] = $propertyValue;
-        }
-        return $requestProperties;
     }
 
     /**
