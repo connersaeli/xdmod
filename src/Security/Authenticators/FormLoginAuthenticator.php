@@ -141,21 +141,6 @@ class FormLoginAuthenticator extends AbstractLoginFormAuthenticator implements A
     }
 
     /**
-     * Retrieve user credentials from the provided Request. Validates that the username length is less than or equal to
-     * Security::MAX_USERNAME_LENGTH and if not it throws a BadCredentialsException. If credentials are able to be
-     * successfully retrieved and they are valid than the Security::LAST_USERNAME session variable is set to the
-     * retrieved username.
-     *
-     * @param Request $request
-     * @return array containing the username / password retrieved from the provided Request.
-     * @throws BadRequestHttpException if the username parameter is not a string, or if it's an object that does not provide a __toString method.
-     * @throws BadCredentialsException if the provided username is longer than Security::MAX_USERNAME_LENGTH.
-     */
-    private function getCredentials(Request $request): array
-    {
-    }
-
-    /**
      * We do the translation from Symfony User to XDUser here by looking for an XDUser that has the same username as
      * the authenticated Symfony User. When found, we set the `xdUser` session variable equal to the XDUser's user id.
      *

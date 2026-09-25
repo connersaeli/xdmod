@@ -105,6 +105,7 @@ class RouteBasedExceptionListener
                 || $route == 'legacy_user_interface'
                 || str_starts_with($route, 'ccr_userinterface_')
                 || str_starts_with($route, 'ccr_reportbuilder_')
+                || str_starts_with($route, 'ccr_warehouse_')
             ) {
                 $response = new JsonResponse($defaultContent);
                 $response->setStatusCode(Response::HTTP_UNAUTHORIZED);

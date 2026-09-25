@@ -594,6 +594,7 @@ class WarehouseController extends BaseController
      *                           the dimensions retrieved.
      * @throws Exception
      */
+    #[IsGranted('ROLE_USER')]
     #[Route('/warehouse/resources', methods: ['GET'])]
     #[Route('{prefix}warehouse/resources', requirements: ['prefix' => '.*'], methods: ['GET'])]
     public function getResources(Request $request): Response
