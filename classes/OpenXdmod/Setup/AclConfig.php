@@ -36,7 +36,16 @@ MSG;
 
         $output = shell_exec($cmd);
 
-        $hadError = strpos($output, 'error') !== false;
+        if (false == $output) {
+            // Pipe cannot be established
+            $hadError = true;
+        } elseif (is_null($output)) {
+            // Indeterminate if the command failed
+            // or produced no output
+            $hadError = false;
+        } else {
+            $hadError = str_contains($output, 'error') !== false;
+        }
 
         if ($hadError == true) {
             $this->console->displayBlankLine();
