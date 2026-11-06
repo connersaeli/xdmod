@@ -18,7 +18,6 @@ use Models\Services\JsonWebToken;
 
 class TokenHandler implements AccessTokenHandlerInterface
 {
-    const MISSING_TOKEN_MESSAGE = 'No token provided.';
     const INVALID_TOKEN_MESSAGE = 'Invalid token.';
     const EXPIRED_TOKEN_MESSAGE = 'Token has expired.';
     /**

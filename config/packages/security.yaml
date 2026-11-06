@@ -18,8 +18,7 @@ security:
             access_token:
                 token_handler: CCR\Security\TokenHandlers\TokenHandler
                 token_extractors:
-                    - 'header'
-                    - CCR\Security\TokenExtractors\QueryTokenExtractor
+                    - 'query_string'
                     - 'request_body'
         main:
             lazy: true
@@ -27,8 +26,7 @@ security:
             access_token:
                 token_handler: CCR\Security\TokenHandlers\TokenHandler
                 token_extractors:
-                    - 'header'
-                    - CCR\Security\TokenExtractors\QueryTokenExtractor
+                    - 'query_string'
                     - 'request_body'
             custom_authenticators:
                 - CCR\Security\Authenticators\FormLoginAuthenticator
