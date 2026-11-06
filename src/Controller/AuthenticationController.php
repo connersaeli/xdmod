@@ -106,11 +106,12 @@ class AuthenticationController extends BaseController
         } catch (Exception $e) {
             throw new HttpException(501, 'JupyterHub not configured.');
         }
-        try {
-            $user = $this->getXDUser();
-        } catch (UnauthorizedHttpException $e) {
+
+        $user = $this->getXDUser();
+        if ($user->isPublicUser()) {
             return new RedirectResponse('/#jwt-redirect');
         }
+
         list($jwt, $expiration) = JsonWebToken::encode($user->getUsername());
         $cookie = new Cookie(
             'xdmod_jwt',
