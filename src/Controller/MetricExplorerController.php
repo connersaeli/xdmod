@@ -56,24 +56,20 @@ class MetricExplorerController extends BaseController
             'action' => $action
         ];
         $statusCode = 401;
+        $user = $this->getXDUser();
 
         try {
-            $user = $this->getXDUser();
-            if (isset($user)) {
-                $queries = new \UserStorage($user, self::QUERIES_STORE);
-                $data = $queries->get();
+            $queries = new \UserStorage($user, self::QUERIES_STORE);
+            $data = $queries->get();
 
-                foreach ($data as &$query) {
-                    $this->removeRoleFromQuery($user, $query);
-                    $query['name'] = htmlspecialchars($query['name'], ENT_COMPAT, 'UTF-8', false);
-                }
-
-                $payload['data'] = $data;
-                $payload['success'] = true;
-                $statusCode = 200;
-            } else {
-                $payload['message'] = self::DEFAULT_ERROR_MESSAGE;
+            foreach ($data as &$query) {
+                $this->removeRoleFromQuery($user, $query);
+                $query['name'] = htmlspecialchars($query['name'], ENT_COMPAT, 'UTF-8', false);
             }
+
+            $payload['data'] = $data;
+            $payload['success'] = true;
+            $statusCode = 200;
         } catch (BadRequestHttpException|HttpException $e) {
             $payload['message'] = $e->getMessage();
             $statusCode = $e->getStatusCode();
@@ -102,25 +98,21 @@ class MetricExplorerController extends BaseController
             'action' => $action,
         );
         $statusCode = 401;
+        $user = $this->getXDUser();
 
         try {
-            $user = $this->getXDUser();
-            if (isset($user)) {
-                $queries = new \UserStorage($user, self::QUERIES_STORE);
+            $queries = new \UserStorage($user, self::QUERIES_STORE);
 
-                $query = $queries->getById($queryId);
+            $query = $queries->getById($queryId);
 
-                if (isset($query)) {
-                    $payload['data'] = $query;
-                    $payload['data']['name'] = htmlspecialchars($query['name'], ENT_COMPAT, 'UTF-8', false);
-                    $payload['success'] = true;
-                    $statusCode = 200;
-                } else {
-                    $payload['message'] = 'Unable to find the query identified by the provided id: ' . $queryId;
-                    $statusCode = 404;
-                }
+            if (isset($query)) {
+                $payload['data'] = $query;
+                $payload['data']['name'] = htmlspecialchars($query['name'], ENT_COMPAT, 'UTF-8', false);
+                $payload['success'] = true;
+                $statusCode = 200;
             } else {
-                $payload['message'] = self::DEFAULT_ERROR_MESSAGE;
+                $payload['message'] = 'Unable to find the query identified by the provided id: ' . $queryId;
+                $statusCode = 404;
             }
         } catch (BadRequestHttpException|HttpException $e) {
             $payload['message'] = $e->getMessage();
@@ -149,30 +141,27 @@ class MetricExplorerController extends BaseController
             'action' => $action,
         );
         $statusCode = 401;
+        $user = $this->getXDUser();
+
         try {
-            $user = $this->getXDUser();
-            if (isset($user)) {
-                $queries = new \UserStorage($user, self::QUERIES_STORE);
-                $data = $request->get('data');
-                if ($data === null) {
-                    throw new BadRequestHttpException('data is a required parameter.');
-                }
-                if (!is_string($data)) {
-                    throw new BadRequestHttpException('Invalid value for data. Must be a(n) string.');
-                }
-                $data = json_decode($data, true);
-                $success = $queries->insert($data) != null;
-                $payload['success'] = $success;
-                if ($success) {
-                    $payload['success'] = true;
-                    $payload['data'] = $data;
-                    $statusCode = 200;
-                } else {
-                    $payload['message'] = 'Error creating chart. User is over the chart limit.';
-                    $statusCode = 500;
-                }
+            $queries = new \UserStorage($user, self::QUERIES_STORE);
+            $data = $request->get('data');
+            if ($data === null) {
+                throw new BadRequestHttpException('data is a required parameter.');
+            }
+            if (!is_string($data)) {
+                throw new BadRequestHttpException('Invalid value for data. Must be a(n) string.');
+            }
+            $data = json_decode($data, true);
+            $success = $queries->insert($data) != null;
+            $payload['success'] = $success;
+            if ($success) {
+                $payload['success'] = true;
+                $payload['data'] = $data;
+                $statusCode = 200;
             } else {
-                $payload['message'] = self::DEFAULT_ERROR_MESSAGE;
+                $payload['message'] = 'Error creating chart. User is over the chart limit.';
+                $statusCode = 500;
             }
         } catch (BadRequestHttpException|HttpException $e) {
             $payload['message'] = $e->getMessage();
@@ -207,55 +196,51 @@ class MetricExplorerController extends BaseController
             'message' => 'success'
         );
         $statusCode = 401;
+        $user = $this->getXDUser();
 
         try {
-            $user = $this->getXDUser();
-            if (isset($user)) {
-                $queries = new \UserStorage($user, self::QUERIES_STORE);
+            $queries = new \UserStorage($user, self::QUERIES_STORE);
 
-                $query = $queries->getById($queryId);
-                if (isset($query)) {
-                    $data = $request->get('data');
-                    if (isset($data)) {
-                        if (!is_string($data)) {
-                            throw new BadRequestHttpException('Invalid value for data. Must be a(n) string.');
-                        }
-                        $jsonData = json_decode($data, true);
-                        $name = isset($jsonData['name']) ? $jsonData['name'] : null;
-                        $config = isset($jsonData['config']) ? $jsonData['config'] : null;
-                        $ts = isset($jsonData['ts']) ? $jsonData['ts'] : microtime(true);
-                    } else {
-                        $name = $this->getStringParam($request, 'name');
-                        $config = $this->getStringParam($request, 'config');
-                        $ts = $this->getDateTimeFromUnixParam($request, 'ts');
+            $query = $queries->getById($queryId);
+            if (isset($query)) {
+                $data = $request->get('data');
+                if (isset($data)) {
+                    if (!is_string($data)) {
+                        throw new BadRequestHttpException('Invalid value for data. Must be a(n) string.');
                     }
-
-                    if (isset($name)) {
-                        $query['name'] = $name;
-                    }
-                    if (isset($config)) {
-                        $query['config'] = $config;
-                    }
-                    if (isset($ts)) {
-                        $query['ts'] = $ts;
-                    }
-
-                    $queries->upsert($queryId, $query);
-
-                    // required for the UI to do it's thing.
-                    $total = count($queries->get());
-
-                    // make sure everything is in place for returning to the
-                    // front end.
-                    $payload['total'] = $total;
-                    $payload['success'] = true;
-                    $statusCode = 200;
+                    $jsonData = json_decode($data, true);
+                    $name = isset($jsonData['name']) ? $jsonData['name'] : null;
+                    $config = isset($jsonData['config']) ? $jsonData['config'] : null;
+                    $ts = isset($jsonData['ts']) ? $jsonData['ts'] : microtime(true);
                 } else {
-                    $payload['message'] = 'There was no query found for the given id';
-                    $statusCode = 404;
+                    $name = $this->getStringParam($request, 'name');
+                    $config = $this->getStringParam($request, 'config');
+                    $ts = $this->getDateTimeFromUnixParam($request, 'ts');
                 }
+
+                if (isset($name)) {
+                    $query['name'] = $name;
+                }
+                if (isset($config)) {
+                    $query['config'] = $config;
+                }
+                if (isset($ts)) {
+                    $query['ts'] = $ts;
+                }
+
+                $queries->upsert($queryId, $query);
+
+                // required for the UI to do it's thing.
+                $total = count($queries->get());
+
+                // make sure everything is in place for returning to the
+                // front end.
+                $payload['total'] = $total;
+                $payload['success'] = true;
+                $statusCode = 200;
             } else {
-                $payload['message'] = self::DEFAULT_ERROR_MESSAGE;
+                $payload['message'] = 'There was no query found for the given id';
+                $statusCode = 404;
             }
         } catch (BadRequestHttpException|HttpException $e) {
             $payload['message'] = $e->getMessage();
@@ -285,31 +270,27 @@ class MetricExplorerController extends BaseController
             'message' => 'success'
         );
         $statusCode = 401;
+        $user = $this->getXDUser();
 
         try {
-            $user = $this->getXDUser();
-            if (isset($user)) {
-                $queries = new \UserStorage($user, self::QUERIES_STORE);
-                $query = $queries->getById($queryId);
+            $queries = new \UserStorage($user, self::QUERIES_STORE);
+            $query = $queries->getById($queryId);
 
-                if (isset($query)) {
+            if (isset($query)) {
 
-                    $before = count($queries->get());
-                    $after = $queries->delById($queryId);
-                    $success = $before > $after;
+                $before = count($queries->get());
+                $after = $queries->delById($queryId);
+                $success = $before > $after;
 
-                    // make sure everything is in place for returning to the
-                    // front end.
-                    $payload['success'] = $success;
-                    $payload['message'] = $success ? $payload['message'] : 'There was an error removing the query identified by: ' . $queryId;
+                // make sure everything is in place for returning to the
+                // front end.
+                $payload['success'] = $success;
+                $payload['message'] = $success ? $payload['message'] : 'There was an error removing the query identified by: ' . $queryId;
 
-                    $statusCode = $success ? 200 : 500;
-                } else {
-                    $payload['message'] = 'There was no query found for the given id';
-                    $statusCode = 404;
-                }
+                $statusCode = $success ? 200 : 500;
             } else {
-                $payload['message'] = self::DEFAULT_ERROR_MESSAGE;
+                $payload['message'] = 'There was no query found for the given id';
+                $statusCode = 404;
             }
         } catch (BadRequestHttpException|HttpException $e) {
             $payload['message'] = $e->getMessage();
