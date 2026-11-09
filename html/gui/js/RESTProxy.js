@@ -157,7 +157,7 @@ XDMoD.REST.Call = function(config) {
 
       return Ext.Ajax.request({
 
-         url: XDMoD.REST.baseURL + config.action
+         url: XDMoD.REST.baseURL + config.action,
 
          method : 'POST',
 
