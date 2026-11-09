@@ -37,7 +37,7 @@ XDMoD.Module.Dashboard.ReportThumbnailsComponent = Ext.extend(Ext.Panel, {
         }
 
         this.store = new Ext.data.JsonStore({
-            url: '/dashboard/rolereport',
+            url: XDMoD.REST.url + '/dashboard/rolereport',
             root: 'data.queue',
             fields: [
                 'chart_title',

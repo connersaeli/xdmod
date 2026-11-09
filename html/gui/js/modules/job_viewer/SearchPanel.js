@@ -629,12 +629,12 @@ XDMoD.Module.JobViewer.SearchPanel = Ext.extend(Ext.Panel, {
 
         return new Ext.data.JsonStore({
             id: 'results_store',
-            url: self.jobViewer.rest.warehouse + '/search/jobs',
+            url: XDMoD.REST.url + '/' + self.jobViewer.rest.warehouse + '/search/jobs',
             proxy: new Ext.data.HttpProxy({
                 api: {
                     read: {
                         method: 'GET',
-                        url   : self.jobViewer.rest.warehouse + '/search/jobs'
+                        url: XDMoD.REST.url + '/' + self.jobViewer.rest.warehouse + '/search/jobs'
                     }
                 }
             }),
@@ -943,7 +943,7 @@ XDMoD.Module.JobViewer.SearchPanel = Ext.extend(Ext.Panel, {
                         enableKeyEvents: true,
                         store: new Ext.data.JsonStore({
                             proxy: new Ext.data.HttpProxy({
-                                url: self.jobViewer.rest.warehouse + '/dimensions/resource',
+                                url: XDMoD.REST.url + '/' + self.jobViewer.rest.warehouse + '/dimensions/resource',
                                 method: 'GET'
                             }),
                             baseParams: {
@@ -1110,7 +1110,7 @@ XDMoD.Module.JobViewer.SearchPanel = Ext.extend(Ext.Panel, {
                                 store: new Ext.data.GroupingStore({
                                     proxy: new Ext.data.HttpProxy({
                                         method: 'GET',
-                                        url: self.jobViewer.rest.warehouse + '/dimensions'
+                                        url: XDMoD.REST.url + '/' + self.jobViewer.rest.warehouse + '/dimensions'
                                     }),
                                     baseParams: {
                                         realm: CCR.xdmod.ui.rawDataAllowedRealms[0],
@@ -1190,7 +1190,7 @@ XDMoD.Module.JobViewer.SearchPanel = Ext.extend(Ext.Panel, {
                                 store: new Ext.data.JsonStore({
                                     proxy: new Ext.data.HttpProxy({
                                         method: 'GET',
-                                        url: self.jobViewer.rest.warehouse + '/dimensions'
+                                        url: XDMoD.REST.url + '/' + self.jobViewer.rest.warehouse + '/dimensions'
                                     }),
                                     baseParams: {
                                         querygroup: 'tg_usage',
@@ -1462,7 +1462,7 @@ XDMoD.Module.JobViewer.SearchPanel = Ext.extend(Ext.Panel, {
 
         var realm = params.searchterms.params.realm;
         var idFragment = id !== undefined ? '/' + id : '';
-        var url = self.jobViewer.rest.warehouse + '/search/history' + idFragment  + '?realm=' + realm;
+        var url = XDMoD.REST.url + '/' + self.jobViewer.rest.warehouse + '/search/history' + idFragment  + '?realm=' + realm;
 
         Ext.Ajax.request({
                 url: url,
@@ -1671,7 +1671,7 @@ XDMoD.Module.JobViewer.SearchPanel = Ext.extend(Ext.Panel, {
      */
     _findFieldDisplay: function(field) {
         var self = this;
-        var url = self.jobViewer.rest.warehouse +
+        var url = XDMoD.REST.url + '/' + self.jobViewer.rest.warehouse +
             '/dimensions/' + field + '/name';
 
         return this._getPromise(url, ['results', 'name']);
@@ -1688,7 +1688,7 @@ XDMoD.Module.JobViewer.SearchPanel = Ext.extend(Ext.Panel, {
      */
     _findFieldValueDisplay: function(field, value) {
         var self = this;
-        var url = self.jobViewer.rest.warehouse +
+        var url = XDMoD.REST.url + '/' + self.jobViewer.rest.warehouse +
             '/dimensions/' + field +
             '/values/' + value +
             '/name';
@@ -1760,7 +1760,7 @@ XDMoD.Module.JobViewer.SearchPanel = Ext.extend(Ext.Panel, {
             var realm = this._getNodeValue(this._getParentNode(node, 'realm'), 'realm');
             realm = realm !== null ? realm : '';
 
-            var url = self.jobViewer.rest.warehouse +
+            var url = XDMoD.REST.url + '/' + self.jobViewer.rest.warehouse +
                     '/search/history/' + this.dtypeId +
                     '?realm=' + realm;
 

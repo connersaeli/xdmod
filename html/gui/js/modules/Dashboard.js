@@ -17,7 +17,7 @@ Ext.extend(XDMoD.Module.Summary, XDMoD.PortalModule, {
 
         var portletStore = new Ext.data.JsonStore({
             restful: true,
-            url: '/dashboard/components',
+            url: XDMoD.REST.url + '/dashboard/components',
             root: 'data',
             fields: ['name', 'type', 'config', 'column'],
             listeners: {
@@ -50,7 +50,7 @@ Ext.extend(XDMoD.Module.Summary, XDMoD.PortalModule, {
                                     }
                                 }
                                 Ext.Ajax.request({
-                                    url: '/dashboard/layout',
+                                    url: XDMoD.REST.url + '/dashboard/layout',
                                     params: {
                                         data: Ext.encode({
                                             columns: this.items.getCount(),
@@ -120,7 +120,7 @@ Ext.extend(XDMoD.Module.Summary, XDMoD.PortalModule, {
                     if (CCR.xdmod.publicUser !== true && !XDMoD.tourPromptShown) {
                         var conn = new Ext.data.Connection();
                         conn.request({
-                            url: '/dashboard/viewedUserTour',
+                            url: XDMoD.REST.url + '/dashboard/viewedUserTour',
                             success: function (response) {
                                 var serverResp = Ext.decode(response.responseText);
                                 if (serverResp.data.length === 0 || !serverResp.data[0].viewedTour) {
@@ -134,7 +134,7 @@ Ext.extend(XDMoD.Module.Summary, XDMoD.PortalModule, {
                                             var newUserTourCheckbox = Ext.select('#new-user-tour-checkbox');
                                             if (newUserTourCheckbox.elements[0].checked) {
                                                 Ext.Ajax.request({
-                                                    url: '/dashboard/viewedUserTour',
+                                                    url: XDMoD.REST.url + '/dashboard/viewedUserTour',
                                                     params: {
                                                         viewedTour: 1
                                                     },
