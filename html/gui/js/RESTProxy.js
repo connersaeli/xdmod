@@ -19,6 +19,8 @@
 
 Ext.namespace('XDMoD.REST');
 
+XDMoD.REST.baseURL = '/rest/';                     // Path to where the REST Front Controller resides
+
 // -----------------------------------------------------
 
 // XDMoD.REST.Call --
@@ -44,7 +46,8 @@ XDMoD.REST.Call = function(config) {
    // If config.action has an absolute url (http://....), then do not use XDMoD.REST.baseURL
    // If config.action is using a relative url (/action/....), then use XDMoD.REST.baseURL
 
-   const fullURL = config.action + restArgumentString;
+   var fullURL = (config.action.indexOf('http') == 0) ? '' : XDMoD.REST.baseURL;
+   fullURL = fullURL + config.action + restArgumentString;
 
    // =================================================================
 
@@ -154,7 +157,7 @@ XDMoD.REST.Call = function(config) {
 
       return Ext.Ajax.request({
 
-         url: config.action,
+         url: XDMoD.REST.baseURL + config.action
 
          method : 'POST',
 

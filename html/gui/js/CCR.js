@@ -314,7 +314,7 @@ XDMoD.createTour = function () {
                 if (CCR.xdmod.publicUser !== true) {
                     var conn = new Ext.data.Connection();
                     conn.request({
-                        url: '/dashboard/viewedUserTour',
+                        url: XDMoD.REST.url + '/dashboard/viewedUserTour',
                         params: {
                             viewedTour: 1
                         },

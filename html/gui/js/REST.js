@@ -46,7 +46,7 @@ XDMoD.REST.download = function (options) {
  */
 XDMoD.REST.prependPathBase = function (path) {
     var pathBaseSeparator = path.startsWith('/') ? '' : '/';
-    return pathBaseSeparator + path;
+    return XDMoD.REST.url + pathBaseSeparator + path;
 };
 
 /**
