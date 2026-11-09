@@ -1908,7 +1908,7 @@ SQL;
      *
      */
 
-    public function getPersonID($default = FALSE)
+    public function getPersonID() : string
     {
         return (empty($this->_personID)) ? '0' : $this->_personID;
     }//getPersonID

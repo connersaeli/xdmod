@@ -801,7 +801,7 @@ class UserAdminController extends BaseController
             $userDetails['email_address'] = '';
         }
 
-        $userDetails['assigned_user_id'] = $selected_user->getPersonID(true);
+        $userDetails['assigned_user_id'] = $selected_user->getPersonID();
 
         $userDetails['institution'] = $selected_user->getOrganizationID();
 

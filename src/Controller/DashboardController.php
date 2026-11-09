@@ -54,7 +54,7 @@ class DashboardController extends BaseController
      */
     private function getConfigVariables(XDUser $user): array
     {
-        $person_id = $user->getPersonID(true);
+        $person_id = $user->getPersonID();
         $obj_warehouse = new \XDWarehouse();
 
         return array(

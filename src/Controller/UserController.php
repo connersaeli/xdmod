@@ -102,7 +102,7 @@ class UserController extends BaseController
             'field_of_science' => $user->getFieldOfScience(),
             'active_role' => $mostPrivilegedFormalName,
             'most_privileged_role' => $mostPrivilegedFormalName,
-            'person_id' => $user->getPersonID(true),
+            'person_id' => $user->getPersonID(),
             'raw_data_allowed_realms' => $rawDataRealms
         ];
 
