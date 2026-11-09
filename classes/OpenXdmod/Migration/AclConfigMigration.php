@@ -15,14 +15,10 @@ class AclConfigMigration extends Migration
      */
     public function execute()
     {
-        $cmd = BIN_DIR . '/acl-config';
+        $output = exec(BIN_DIR . '/acl-config 2>&1', $output, $result_code);
 
-        $output = shell_exec($cmd);
-
-        if ($output === false) {
-            $this->logger->error("Error executing acl-config");
-        } elseif ($output !== null) {
-            $this->logger->error($output);
+        if ($result_code !== 0) {
+            $this->logger->error("Error executing acl-config", $output);
         }
     }
 }
