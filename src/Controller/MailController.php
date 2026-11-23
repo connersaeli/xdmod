@@ -24,7 +24,6 @@ class MailController extends BaseController
     #[Route('/controllers/mailer.php', methods: ['POST'], name: 'legacy_mailer_index')]
     public function index(Request $request): Response
     {
-        $user = $this->getXDUser();
         $operation = $this->getStringParam($request, 'operation');
 
         if (empty($operation)) {
@@ -33,7 +32,7 @@ class MailController extends BaseController
 
         switch ($operation) {
             case 'contact':
-                return $this->contact($request, $user);
+                return $this->contact($request);
             case 'sign_up':
                 return $this->signUp($request);
             default:
@@ -48,7 +47,7 @@ class MailController extends BaseController
      * @param ?XDUser $user
      * @return Response
      */
-    private function contact(Request $request, ?XDUser $user): Response
+    private function contact(Request $request): Response
     {
         $user = $this->getXDUser();
 

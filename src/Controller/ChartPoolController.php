@@ -28,8 +28,6 @@ class ChartPoolController extends BaseController
     #[Route('/chart_pool')]
     public function index(Request $request): Response
     {
-        $user = $this->getXDUser();
-
         $operation = $this->getStringParam($request, 'operation');
         if (empty($operation)) {
             return $this->json(buildError('operation_not_defined'));
@@ -37,9 +35,9 @@ class ChartPoolController extends BaseController
 
         switch ($operation) {
             case 'add_to_queue':
-                return $this->addToQueue($request, $user);
+                return $this->addToQueue($request);
             case 'remove_from_queue':
-                return $this->removeFromQueue($request, $user);
+                return $this->removeFromQueue($request);
         }
 
         return $this->json(buildError('invalid_operation_specified'));
@@ -51,8 +49,10 @@ class ChartPoolController extends BaseController
      * @return Response
      * @throws Exception
      */
-    private function addToQueue(Request $request, XDUser $user): Response
+    private function addToQueue(Request $request): Response
     {
+        $user = $this->getXDUser();
+
         $chartTitle = $this->getStringParam($request, 'chart_title', false, 'Untitled Chart');
         $chartId = $this->getStringParam($request, 'chart_id');
 
@@ -88,10 +88,11 @@ class ChartPoolController extends BaseController
      * @return Response
      * @throws Exception
      */
-    private function removeFromQueue(Request $request, XDUser $user): Response
+    private function removeFromQueue(Request $request): Response
     {
-        $chart_pool = new XDChartPool($user);
+        $user = $this->getXDUser();
 
+        $chart_pool = new XDChartPool($user);
         $chartTitle = $this->getStringParam($request, 'chart_title', false, 'Untitled Chart');
         $chartId = str_replace('title=' . $chartTitle, 'title=' . urlencode($chartTitle), $this->getStringParam($request, 'chart_id', true));
 
