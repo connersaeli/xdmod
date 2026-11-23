@@ -121,10 +121,10 @@ class ReportBuilderController extends BaseController
      * @return Response
      * @throws Exception
      */
+    #[MustBeLoggedIn]
     #[Route('/reports/builder/templates/{templateId}', methods: ['POST'])]
     public function getReportFromTemplate(Request $request, string $templateId): Response
     {
-        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
         $user = $this->getXDUser();
         $template = \XDReportManager::retrieveReportTemplate($user, $templateId);
         $parameters = $request->request->all();
@@ -138,10 +138,10 @@ class ReportBuilderController extends BaseController
      * @return Response
      * @throws Exception
      */
+    #[MustBeLoggedIn]
     #[Route('/reports/builder/send', methods: ['POST'])]
     public function sendReport(Request $request): Response
     {
-        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
         $user = $this->getXDUser();
         $reportManager = new \XDReportManager($user);
 
@@ -235,10 +235,10 @@ class ReportBuilderController extends BaseController
      * @return Response
      * @throws Exception
      */
+    #[MustBeLoggedIn]
     #[Route('/reports/builder/preview', methods: ['POST'])]
     public function getPreviewData(Request $request): Response
     {
-        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
         $user = $this->getXDUser();
 
         $reportId = $this->getStringParam($request, 'report_id', true);
@@ -261,10 +261,10 @@ class ReportBuilderController extends BaseController
      * @return Response
      * @throws Exception
      */
+    #[MustBeLoggedIn]
     #[Route('/reports/builder/name', methods: ['POST'])]
     public function getNewReportName(Request $request): Response
     {
-        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
         $user = $this->getXDUser();
         $reportManager = new \XDReportManager($user);
         return $this->json([
@@ -286,7 +286,6 @@ class ReportBuilderController extends BaseController
         $phase = $this->getStringParam($request, 'phase', true, null, '/^create|update$/');
         $map = [];
 
-        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
         $user = $this->getXDUser();
         $reportManager = new \XDReportManager($user);
         switch ($phase) {
@@ -410,10 +409,10 @@ class ReportBuilderController extends BaseController
      * @return Response
      * @throws Exception
      */
+    #[MustBeLoggedIn]
     #[Route('/reports/builder/remove', methods: ['POST'])]
     public function removeReportsById(Request $request): Response
     {
-        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
         $user = $this->getXDUser();
         $reportManager = new \XDReportManager($user);
 
@@ -434,10 +433,10 @@ class ReportBuilderController extends BaseController
      * @return Response
      * @throws Exception
      */
+    #[MustBeLoggedIn]
     #[Route('/reports/builder/remove/chart', methods: ['POST'])]
     public function removeChartFromPool(Request $request): Response
     {
-        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
         $user = XDUser::getUserByUserName($this->getUser()->getUserIdentifier());
         $reportManager = new \XDReportManager($user);
         $responseData = [
@@ -496,13 +495,10 @@ class ReportBuilderController extends BaseController
      * @return Response
      * @throws Exception
      */
+    #[MustBeLoggedIn]
     #[Route('/reports/builder/image', methods: ['GET'])]
     public function generateReportImage(Request $request): Response
     {
-        $this->logger->debug('Generating report image');
-
-        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
-
         $userId = null;
         try {
             $user = XDUser::getUserByUserName($this->getUser()->getUserIdentifier());
@@ -632,10 +628,10 @@ class ReportBuilderController extends BaseController
      * @return Response
      * @throws Exception
      */
+    #[MustBeLoggedIn]
     #[Route('/reports/builder/{reportId}', methods: ['GET'])]
     public function getReportData(Request $request, string $reportId): Response
     {
-        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
         $user = $this->getXDUser();
 
         $reportManager = new \XDReportManager($user);
