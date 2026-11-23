@@ -29,7 +29,6 @@ test('Single Sign On Login', async ({page}) =>{
     await test.step('Logout', async () => {
         await expect(page.locator('#logout_link')).toBeVisible();
         await page.locator('#logout_link').click();
-        await page.locator('#logout_link').click();
         await expect(page.locator('a[href*=actionLogin]')).toBeVisible();
         await expect(page.locator('#main_tab_panel__about_xdmod')).toBeVisible();
     });
