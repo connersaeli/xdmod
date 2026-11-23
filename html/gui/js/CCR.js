@@ -1049,8 +1049,9 @@ CCR.xdmod.ui.actionLogout = function () {
             params: {
                 _csrf_token: CCR.xdmod.csrf_token
             },
-            success: function () {
-                location.href = "/";
+            success: function (response) {
+                const data = Ext.decode(response.responseText);
+                location.href = data.returnTo;
             }
         });
     }
