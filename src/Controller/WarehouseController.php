@@ -2183,8 +2183,11 @@ class WarehouseController extends BaseController
                 );
             }
         };
-        /*TODO: Validate that this is how to do a streamed response. */
-        return new StreamedResponse($streamCallback, 200, ['Content-Type' => 'application/json-seq']);
+
+        return new StreamedResponse(
+            callbackOrChunks: $streamCallback,
+            headers: ['Content-Type' => 'text/plain']
+        );
     }
 
 
