@@ -2185,7 +2185,7 @@ class WarehouseController extends BaseController
         };
 
         return new StreamedResponse(
-            callbackOrChunks: $streamCallback,
+            $streamCallback,
             headers: ['Content-Type' => 'text/plain']
         );
     }
