@@ -38,19 +38,7 @@ class HomeController extends BaseController
     #[Route('/', name: 'xdmod_home', methods: ['GET', 'OPTIONS'])]
     public function index(Request $request): Response
     {
-
-        if ($request->isMethod('OPTIONS')) {
-            // We don't need to send anything back for a CORS pre-flight
-            return new Response();
-        }
-
         $session = $request->getSession();
-        $returnTo = $session->get('_security.main.target_path');
-        if (!empty($returnTo)) {
-            $returnTo = urldecode($returnTo);
-            $session->set('_security.main.target_path', null);
-            return new RedirectResponse("$returnTo");
-        }
 
         $user = $this->getXDUser();
         $userLoggedIn = !$user->isPublicUser();
@@ -247,20 +235,20 @@ class HomeController extends BaseController
         return null;
     }
 
-    private function getProfileEditorInitFlag(Session $session, XDUser $user)
+    private function getProfileEditorInitFlag(Session $session, XDUser $xdUser)
     {
         $profile_editor_init_flag = '';
-        $usersFirstLogin = ($user->getCreationTimestamp() == $user->getUpdateTimestamp() && !$user->isPublicUser());
+        $usersFirstLogin = ($xdUser->getCreationTimestamp() == $xdUser->getUpdateTimestamp() && !$xdUser->isPublicUser());
 
         // If the user logging in is an XSEDE/Single Sign On user, they may or may not have
         // an e-mail address set. The logic below assists in presenting the Profile Editor
         // with the appropriate (initial) view
-        $userEmail = $user->getEmailAddress();
+        $userEmail = $xdUser->getEmailAddress();
         $userEmailSpecified = ($userEmail != NO_EMAIL_ADDRESS_SET && !empty($userEmail));
-        if ($user->isSSOUser() === true || $usersFirstLogin) {
+        if ($xdUser->isSSOUser() === true || $usersFirstLogin) {
 
             $suppressProfileAutoload = $session->get('suppress_profile_autoload');
-            if ($usersFirstLogin && $userEmailSpecified && (!isset($suppressProfileAutoload) && $user->getUserType() != 50)) {
+            if ($usersFirstLogin && $userEmailSpecified && (!isset($suppressProfileAutoload) && $xdUser->getUserType() != 50)) {
                 // If the user is logging in for the first time and does have an e-mail address set
                 // (due to it being specified in the XDcDB), welcome the user and inform them they
                 // have an opportunity to update their e-mail address.

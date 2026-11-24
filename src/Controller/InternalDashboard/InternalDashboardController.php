@@ -56,6 +56,11 @@ class InternalDashboardController extends BaseController
             'user' => $user,
             'extjs_path' => 'gui/lib',
             'extjs_version' => 'extjs',
+            'rest_url' => sprintf(
+                '%s%s',
+                \xd_utilities\getConfiguration('rest', 'base'),
+                \xd_utilities\getConfiguration('rest', 'version')
+            ),
             'xdmod_features' => json_encode($this->getFeatures()),
             'is_logged_in' => !$user->isPublicUser(),
             'is_public_user' => $user->isPublicUser(),

@@ -37,7 +37,7 @@ class RouteBasedExceptionListener
         $route = $request->attributes->get('_route');
         $exception = $event->getThrowable();
         $event->allowCustomResponseCode();
-        $this->logger->debug("Exception occurred:", [$exception]);
+
         $statusCode = Response::HTTP_UNAUTHORIZED;
         $content = [
             'success' => false,
@@ -50,7 +50,7 @@ class RouteBasedExceptionListener
             'code' => 2
         ];
         $error_during_authorization_message = 'An error was encountered while attempting to process the requested authorization procedure.';
-        // For src/Controller/InternalDashboard/AdminController::resetUserTourViewed
+
         if ($route == 'ccr_internaldashboard_admin_resetusertourviewed') {
             if ($exception instanceof AccessDeniedHttpException) {
                 $statusCode = $this->security->getUser() ? Response::HTTP_FORBIDDEN : Response::HTTP_UNAUTHORIZED;
@@ -68,7 +68,10 @@ class RouteBasedExceptionListener
                 }
             }
         // Support Legacy format for the Internal Dashboard controller endpoints
-        } elseif ($route == 'ccr_chartpool_index') {
+        } elseif (
+            $route == 'ccr_chartpool_index'
+            || $route == 'ccr_reportbuilder_index'
+        ) {
             if ($exception instanceof HttpException) {
                 $statusCode = $exception->getStatusCode();
                 if ($statusCode == Response::HTTP_UNAUTHORIZED) {
@@ -99,7 +102,13 @@ class RouteBasedExceptionListener
                 $response = new JsonResponse($content, $statusCode);
                 $event->setResponse($response);
             }
-        } elseif ($route == 'ccr_dashboard_setviewedusertour') {
+        } elseif (
+            $route == 'ccr_dashboard_setviewedusertour'
+            || $route == 'ccr_warehouseexport_createrequest'
+            || $route == 'get_current_user'
+            || str_starts_with($route, 'ccr_user_')
+            || str_starts_with($route, 'ccr_efficiencycontrollerprovider_')
+        ) {
             if ($exception instanceof HttpException) {
                 $statusCode = $exception->getStatusCode();
                 if ($statusCode == Response::HTTP_UNAUTHORIZED) {
@@ -169,10 +178,10 @@ class RouteBasedExceptionListener
                 }
             }
         } elseif ($route == 'ccr_metricexplorer_index') {
-            if ($exception instanceof UnauthorizedHttpException) {
-                $response = new JsonResponse($content, $statusCode);
-                $event->setResponse($response);
-            } elseif ($exception instanceof HttpException) {
+            if (
+                $exception instanceof UnauthorizedHttpException
+                || $exception instanceof HttpException
+            ) {
                 $response = new JsonResponse($content, $statusCode);
                 $event->setResponse($response);
             }
@@ -190,24 +199,6 @@ class RouteBasedExceptionListener
             } elseif ($exception instanceof HttpException) {
                 if ($statusCode == Response::HTTP_FORBIDDEN) {
                     $response = new JsonResponse($content, Response::HTTP_OK);
-                    $event->setResponse($response);
-                }
-            }
-        } elseif ($route == 'ccr_reportbuilder_index') {
-            if ($exception instanceof HttpException) {
-                $statusCode = $exception->getStatusCode();
-                if ($statusCode == Response::HTTP_UNAUTHORIZED) {
-                    $response = new JsonResponse($content, $statusCode);
-                    $event->setResponse($response);
-                }
-            }
-        } elseif (str_starts_with($route, 'ccr_user_')) {
-            if ($exception instanceof HttpException) {
-                $statusCode = $exception->getStatusCode();
-                if ($statusCode == Response::HTTP_UNAUTHORIZED) {
-                    $content['message'] = $error_during_authorization_message;
-                    $content['code'] = 0;
-                    $response = new JsonResponse($content, $statusCode);
                     $event->setResponse($response);
                 }
             }
@@ -250,41 +241,11 @@ class RouteBasedExceptionListener
                 $response = new JsonResponse($content, $statusCode);
                 $event->setResponse($response);
             }
-        } elseif ($route == 'ccr_warehouseexport_createrequest') {
-            if ($exception instanceof HttpException) {
-                $statusCode = $exception->getStatusCode();
-                if ($statusCode == Response::HTTP_UNAUTHORIZED) {
-                    $content['message'] = $error_during_authorization_message;
-                    $content['code'] = 0;
-                    $response = new JsonResponse($content, $statusCode);
-                    $event->setResponse($response);
-                }
-            }
-        } elseif ($route == 'get_current_user') {
-            if ($exception instanceof HttpException) {
-                $statusCode = $exception->getStatusCode();
-                if ($statusCode == Response::HTTP_UNAUTHORIZED) {
-                    $content['message'] = $error_during_authorization_message;
-                    $content['code'] = 0;
-                    $response = new JsonResponse($content, $statusCode);
-                    $event->setResponse($response);
-                }
-            }
         } elseif ($route == 'legacy_user_interface') {
             if ($exception instanceof UnauthorizedHttpException) {
                 $response = new JsonResponse($content, $statusCode);
                 $event->setResponse($response);
             } elseif ($exception instanceof HttpException) {
-                $statusCode = $exception->getStatusCode();
-                if ($statusCode == Response::HTTP_UNAUTHORIZED) {
-                    $content['message'] = $error_during_authorization_message;
-                    $content['code'] = 0;
-                    $response = new JsonResponse($content, $statusCode);
-                    $event->setResponse($response);
-                }
-            }
-        } elseif (str_starts_with($route, 'ccr_efficiencycontrollerprovider_')) {
-            if ($exception instanceof HttpException) {
                 $statusCode = $exception->getStatusCode();
                 if ($statusCode == Response::HTTP_UNAUTHORIZED) {
                     $content['message'] = $error_during_authorization_message;

@@ -5,6 +5,7 @@ namespace CCR\Entity;
 
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use XDUser;
 
 /**
  *
@@ -110,7 +111,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      * @param \XDUser $xdUser
      * @return User
      */
-    public static function fromXDUser(\XDUser $xdUser): User
+    public static function fromXDUser(XDUser $xdUser): User
     {
         return new User(
             $xdUser->getUsername(),

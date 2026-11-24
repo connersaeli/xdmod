@@ -353,32 +353,53 @@ class MetricExplorerController extends BaseController
     #[Route('/controllers/metric_explorer.php', methods: ['POST', 'GET'])]
     public function index(Request $request): Response
     {
-        $operation = $this->getStringParam($request, 'operation', true);
+        $operation = $this->getStringParam(
+            request: $request,
+            name: 'operation',
+            mandatory: true
+        );
 
         try {
             switch ($operation) {
                 case 'get_data':
-                    return $this->forward('CCR\Controller\MetricExplorerController::getData', ['request' => $request]);
+                    $response = $this->forward(
+                        'CCR\Controller\MetricExplorerController::getData',
+                        ['request' => $request]
+                    );
+                    break;
                 case 'get_dimension':
-                    return $this->forward('CCR\Controller\MetricExplorerController::getDimensionValues', ['request' => $request]);
+                    $response = $this->forward(
+                        'CCR\Controller\MetricExplorerController::getDimensionValues',
+                        ['request' => $request]
+                    );
+                    break;
                 case 'get_dw_descripter':
-                    return $this->forward('CCR\Controller\MetricExplorerController::getDwDescriptors');
+                    $response = $this->forward('CCR\Controller\MetricExplorerController::getDwDescriptors');
+                    break;
                 case 'get_filters':
-                    return $this->forward('CCR\Controller\MetricExplorerController::getFilters');
+                    $response = $this->forward('CCR\Controller\MetricExplorerController::getFilters');
+                    break;
                 case 'get_rawdata':
-                    return $this->forward('CCR\Controller\MetricExplorerController::getRawData', ['request' => $request]);
+                    $response = $this->forward(
+                        'CCR\Controller\MetricExplorerController::getRawData',
+                        ['request' => $request]
+                    );
+                    break;
+                default:
+                    $response = $this->json(
+                        [
+                           'success' => false,
+                           'message' => 'Unknown Operation provided.'
+                        ],
+                        Response::HTTP_BAD_REQUEST
+                    );
+
             }
         } catch (\Exception $e) {
             return $this->json(buildError($e));
         }
 
-        return $this->json(
-            [
-                'success' => false,
-                'message' => 'Unknown Operation provided.'
-            ],
-            Response::HTTP_BAD_REQUEST
-        );
+        return $response;
     }
 
 
